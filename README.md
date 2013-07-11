@@ -49,6 +49,33 @@ message considerably smaller - in theory. Additionally, ProtoBuf's varint encodi
 numeric values - in practice - and the `initialDictionary` parameter even allows to start off with arbitrary string
 values (for keys _and_ values).
 
+Comparison
+----------
+As of today there is a minimalistic test case for the following data:
+
+```json
+{
+    "hello": "world!",
+    "time": 1234567890,
+    "float": 0.011,
+    "boolean": true,
+    "otherbool": false,
+    "null": null,
+    "obj": {
+        "what": "that"
+    },
+    "arr": [1,2,3]
+}
+```
+
+which is
+
+* **131 bytes** large after `JSON.stringify`
+* **151 bytes** after the first `PSON#encode` including the dictionary and
+* **78 bytes** after each subsequent `PSON#encode`
+
+which is, in this case, from the second message onwards about **40% smaller than JSON**.
+
 **Note:** I just started working on this and I am not yet sure if this is a great idea or just another waste of time.
 However, if you are interested in the topic, feel free to try it out, make contact or even to run some benchmarks.
 
