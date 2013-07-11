@@ -1,6 +1,6 @@
-PSON - The bastard child of ProtoBuf and JSON
-=============================================
-You **love** JSON for its simplicity but **hate** it for its network overhead?
+PSON
+====
+You **love** JSON for its simplicity but **hate** it for its network overhead?  
 You **love** ProtoBuf for its small packet size but **hate** it for its complexity?
 
 *Can't there be solely love?*
@@ -49,7 +49,7 @@ message considerably smaller - in theory. Additionally, ProtoBuf's varint encodi
 numeric values - in practice - and the `initialDictionary` parameter even allows to start off with arbitrary string
 values (for keys _and_ values).
 
-**Note:** I just started working on this and I have no idea if this is a great idea or just another waste of time.
+**Note:** I just started working on this and I am not yet sure if this is a great idea or just another waste of time.
 However, if you are interested in the topic, feel free to try it out, make contact or even to run some benchmarks.
 
 **License:** [Apache License, Version 2.0](http://opensource.org/licenses/Apache-2.0)
