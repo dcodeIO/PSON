@@ -1,0 +1,33 @@
+{
+    "name": "pson",
+    "description": "A binary serialization format built on the simplicity of JSON and the encoding capabilities of ProtoBuf.",
+    "version": "0.1.0",
+    "author": "Daniel Wirtz <dcode@dcode.io>",
+    "main": "PSON.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dcodeIO/PSON.git"
+    },
+    "bugs": {
+        "url": "https://github.com/dcodeIO/PSON/issues"
+    },
+    "keywords": ["net", "buffer", "protobuf", "serialization", "bytebuffer", "websocket", "webrtc", "json"],
+    "license": "Apache-2.0",
+    "engines": {
+        "node": ">=0.6"
+    },
+    "dependencies": {
+        "protobufjs": "latest"
+    },
+    "devDependencies": {
+        "preprocessor": "latest",
+        "closurecompiler": "latest"
+    },
+    "scripts": {
+        "proto": "proto2js src/PSON.proto > src/PSON.json",
+        "build": "preprocess src/PSON.js src/ > PSON.js",
+        "compile": "ccjs PSON.js > PSON.min.js",
+        "test": "node tests/test.js",
+        "make": "npm run-script proto && npm run-script build && npm run-script compile && npm test"
+    }
+}

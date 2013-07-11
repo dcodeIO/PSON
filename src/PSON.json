@@ -1,0 +1,146 @@
+{
+    "package": "PSON",
+    "messages": [
+        {
+            "name": "Message",
+            "fields": [
+                {
+                    "rule": "repeated",
+                    "type": "Value",
+                    "name": "dict",
+                    "id": 1,
+                    "options": {
+                        "packed": "true"
+                    }
+                },
+                {
+                    "rule": "required",
+                    "type": "Value",
+                    "name": "data",
+                    "id": 2,
+                    "options": {}
+                }
+            ],
+            "enums": [],
+            "messages": [],
+            "options": {}
+        },
+        {
+            "name": "Value",
+            "fields": [
+                {
+                    "rule": "optional",
+                    "type": "uint32",
+                    "name": "ref",
+                    "id": 1,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "udf",
+                    "id": 2,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "Object",
+                    "name": "obj",
+                    "id": 3,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "Array",
+                    "name": "arr",
+                    "id": 4,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "str",
+                    "id": 5,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "itg",
+                    "id": 6,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "float",
+                    "name": "flt",
+                    "id": 7,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "double",
+                    "name": "dbl",
+                    "id": 8,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "bln",
+                    "id": 9,
+                    "options": {}
+                }
+            ],
+            "enums": [],
+            "messages": [],
+            "options": {}
+        },
+        {
+            "name": "Object",
+            "fields": [
+                {
+                    "rule": "repeated",
+                    "type": "uint32",
+                    "name": "ref",
+                    "id": 1,
+                    "options": {
+                        "packed": "true"
+                    }
+                },
+                {
+                    "rule": "repeated",
+                    "type": "Value",
+                    "name": "val",
+                    "id": 2,
+                    "options": {
+                        "packed": "true"
+                    }
+                }
+            ],
+            "enums": [],
+            "messages": [],
+            "options": {}
+        },
+        {
+            "name": "Array",
+            "fields": [
+                {
+                    "rule": "repeated",
+                    "type": "Value",
+                    "name": "val",
+                    "id": 1,
+                    "options": {
+                        "packed": "true"
+                    }
+                }
+            ],
+            "enums": [],
+            "messages": [],
+            "options": {}
+        }
+    ],
+    "enums": [],
+    "imports": [],
+    "options": {}
+}

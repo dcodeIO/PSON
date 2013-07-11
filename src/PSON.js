@@ -1,0 +1,115 @@
+/*
+ Copyright 2013 Daniel Wirtz <dcode@dcode.io>
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
+/**
+ * @license PSON (c) 2013 Daniel Wirtz <dcode@dcode.io>
+ * Released under the Apache License, Version 2.0
+ * see: https://github.com/dcodeIO/PSON for details
+ */
+(function(global) {
+    "use strict";
+    
+    function loadPSON(ProtoBuf) {
+        if (!ProtoBuf) {
+            throw(new Error("PSON requires ProtoBuf.js: Get it at https://github.com/dcodeIO/ProtoBuf.js"));
+        }
+
+        /**
+         * Constructs a new combined PSON encoder and decoder.
+         * @param {Array.<string>=} values Initial dictionary values
+         * @constructor
+         */
+        var PSON = function(values) {
+    
+            /**
+             * PSON encoder.
+             * @type {PSON.Encoder}
+             */
+            this.encoder = new PSON.Encoder(values);
+    
+            /**
+             * PSON decoder.
+             * @type {PSON.Decoder}
+             */
+            this.decoder = new PSON.Decoder(values);
+        };
+    
+        var proto = ProtoBuf.newBuilder()["import"](
+            // #include "PSON.json"
+        ).build("PSON");
+    
+        /**
+         * PSON message class.
+         * @type {Function}
+         */
+        PSON.Message = proto.Message;
+    
+        /**
+         * PSON value class.
+         * @type {Function}
+         */
+        PSON.Value = proto.Value;
+    
+        /**
+         * PSON array class.
+         * @type {Function}
+         */
+        PSON.Array = proto.Array;
+    
+        /**
+         * PSON object class.
+         * @type {Function}
+         */
+        PSON.Object = proto.Object;
+    
+        // #include "PSON/Encoder.js"
+        
+        // #include "PSON/Decoder.js"
+    
+        /**
+         * Encodes JSON to PSON using this instance's encoder.
+         * @param {*} json JSON
+         * @returns {ByteBuffer} PSON
+         */
+        PSON.prototype.encode = function(json) {
+            return this.encoder.encode(json);
+        };
+    
+        /**
+         * Decodes PSON to JSON using this instance's decoder.
+         * @param {ByteBuffer} pson PSON
+         * @returns {*} JSON
+         */
+        PSON.prototype.decode = function(pson) {
+            return this.decoder.decode(pson);
+        };
+        
+        return PSON;
+    }
+
+    // Enable module loading if available
+    if (typeof module != 'undefined' && module["exports"]) { // CommonJS
+        module["exports"] = loadPSON(require("protobufjs"));
+    } else if (typeof define != 'undefined' && define["amd"]) { // AMD
+        define("PSON", ["ProtoBuf"], loadPSON);
+    } else {
+        if (!global["dcodeIO"]) {
+            global["dcodeIO"] = {};
+        }
+        global["dcodeIO"]["PSON"] = loadPSON(global["dcodeIO"]["ProtoBuf"]);
+    }
+
+})(this);
