@@ -7,7 +7,8 @@ You **love** ProtoBuf for its small packet size but **hate** it for its complexi
 
 Yes it can!
 -----------
-PSON is a binary serialization format built on the simplicity of JSON and the encoding capabilities of ProtoBuf.
+PSON is a binary serialization format built on the simplicity of JSON and the encoding capabilities of
+[ProtoBuf.js](https://github.com/dcodeIO/ProtoBuf.js).
 
 Usage
 -----
@@ -75,6 +76,13 @@ which is
 * **78 bytes** after each subsequent `PSON#encode`
 
 which is, in this case, from the second message onwards about **40% smaller than JSON**.
+
+Documentation
+-------------
+* [Fully documented source code](https://github.com/dcodeIO/PSON/tree/master/src)
+* The [PSON.proto](https://github.com/dcodeIO/PSON/blob/master/src/PSON.proto) is also freely available and it should
+  be quite easy to implement the protocol in a variety of programming languages using your favourite
+  [protobuf library](http://code.google.com/p/protobuf/wiki/ThirdPartyAddOns).
 
 **Note:** I just started working on this and I am not yet sure if this is a great idea or just another waste of time.
 However, if you are interested in the topic, feel free to try it out, make contact or even to run some benchmarks.
