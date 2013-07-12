@@ -12,12 +12,47 @@ Yes it can!
 
 Usage
 -----
+
+#### node.js/CommonJS
+
 `npm install pson`
 
 ```js
 var PSON = require("pson");
 var initialDictionary = {...};
 var pson = new PSON(initialDictionary);
+...
+```
+
+#### RequireJS/AMD
+
+```js
+require.config({
+    ...
+    "paths": {
+        "Long": "/path/to/Long.js",
+        "ByteBuffer": "/path/to/ByteBuffer.js",
+        "ProtoBuf": "/path/to/ProtoBuf.js",
+        "PSON": "/path/to/PSON.js"
+    },
+    ...
+});
+require(["PSON"], function(PSON) {
+    ...
+});
+```
+
+#### Browser
+
+```html
+<script src="//raw.github.com/dcodeIO/Long.js/master/Long.min.js"></script>
+<script src="//raw.github.com/dcodeIO/ByteBuffer.js/master/ByteBuffer.min.js"></script>
+<script src="//raw.github.com/dcodeIO/ProtoBuf.js/master/ProtoBuf.min.js"></script>
+<script src="//raw.github.com/dcodeIO/PSON/master/PSON.min.js"></script>
+```
+
+```js
+var PSON = dcodeIO.PSON;
 ...
 ```
 
@@ -83,6 +118,7 @@ Documentation
 * The [PSON.proto](https://github.com/dcodeIO/PSON/blob/master/src/PSON.proto) is also freely available and it should
   be quite easy to implement the protocol in a variety of programming languages using your favourite
   [protobuf library](http://code.google.com/p/protobuf/wiki/ThirdPartyAddOns).
+* [Background reading](https://github.com/dcodeIO/ProtoBuf.js/wiki/ProtoBuf.js-vs-JSON)
 
 **Note:** I just started working on this and I am not yet sure if this is a great idea or just another waste of time.
 However, if you are interested in the topic, feel free to try it out, make contact or even to run some benchmarks.
