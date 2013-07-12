@@ -88,7 +88,8 @@ The API is pretty much straight forward:
   * `PSON#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
   * `PSON#toArrayBuffer(json: *): ArrayBuffer` encodes straight to an ArrayBuffer
 * `PSON#decode(pson: ByteBuffer|Buffer|ArrayBuffer): *` decodes PSON data to JSON
-* `PSON.freeze(obj: Object)` Freezes an object, preventing its keys from being added to the dictionary when encoded
+* `PSON.freeze(obj: Object)` Freezes an object, preventing its keys and those of its children from being added to the
+  dictionary when encoded
 * `PSON.unfreeze(obj: Object)` Unfreezes an object, allowing its keys to be added to the dictionary again when encoded
 * `PSON#encoder: PSON.Encoder` Encoder instance
 * `PSON#decoder: PSON.Decoder` Decoder instance
