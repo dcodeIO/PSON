@@ -1,7 +1,7 @@
 var PSON = require("../PSON.min.js"),
     assert = require("assert");
 
-var pson = new PSON();
+var pson = new PSON(["that"]); // Explicitly add "that"
 var data = {
     "hello": "world!",
     "time": 1234567890,
@@ -15,7 +15,7 @@ var data = {
     "arr": [1,2,3]
 };
 var bb = pson.encode(data).compact();
-pson.decode(bb); // fill dict
+pson.decode(bb); // dict is now ["that", "hello", "time", "float", "boolean", "otherbool", "null", "obj", "what", "arr"]
 var nDict = bb.length;
 bb = pson.encode(data).compact();
 var nAgain = bb.length;

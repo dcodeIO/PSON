@@ -8,7 +8,8 @@ You **love** ProtoBuf for its small packet size but **hate** it for its complexi
 Yes it can!
 -----------
 **PSON** is a binary serialization format built on the simplicity of JSON and the encoding capabilities of
-[ProtoBuf.js](https://github.com/dcodeIO/ProtoBuf.js).
+[Google's Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview). This repository contains
+a plain JavaScript implementation on top of [ProtoBuf.js](https://github.com/dcodeIO/ProtoBuf.js).
 
 Usage
 -----
