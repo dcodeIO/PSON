@@ -1,7 +1,7 @@
 var PSON = require("../PSON.min.js"),
     assert = require("assert");
 
-var pson = new PSON(["that"]); // Explicitly add "that"
+var pson = new PSON();
 var data = {
     "hello": "world!",
     "time": 1234567890,
@@ -15,14 +15,20 @@ var data = {
     "arr": [1,2,3]
 };
 var bb = pson.encode(data).compact();
-pson.decode(bb); // dict is now ["that", "hello", "time", "float", "boolean", "otherbool", "null", "obj", "what", "arr"]
+pson.decode(bb); // dict is now ["hello", "time", "float", "boolean", "otherbool", "null", "obj", "what", "arr"]
 var nDict = bb.length;
 bb = pson.encode(data).compact();
 var nAgain = bb.length;
 var decData = pson.decode(bb);
 assert.deepEqual(data, decData);
+PSON.freeze(data);
+bb = pson.encode(data).compact();
+var nFreeze = bb.length;
 
-console.log("OK: JSON="+JSON.stringify(data).length+", PSON="+nDict+" dict, "+nAgain+" again");
+// console.log("Dec", pson.decoder.dict);
+// console.log("Enc", pson.encoder.dict);
+
+console.log("OK: JSON="+JSON.stringify(data).length+", PSON="+nDict+" with initial dict, "+nAgain+" subsequently ("+nFreeze+" when frozen)");
 
 /**
  12 id=2 (data), wt=2

@@ -46,10 +46,11 @@ Encoder.prototype.encode = function(data) {
 /**
  * Encodes a single JSON value to PSON. If the data cannot be encoded, a NULL-value is returned.
  * @param {*} data JSON
+ * @param {boolean=} frozen Whether a parent object is already frozen
  * @returns {PSON.Value} PSON value
  * @private
  */
-Encoder.prototype._encodeValue = function(data) {
+Encoder.prototype._encodeValue = function(data, frozen) {
     var value = new PSON.Value(), i;
     if (data !== null) {
         switch (typeof data) {
@@ -79,17 +80,22 @@ Encoder.prototype._encodeValue = function(data) {
                     }
                 } else {
                     value.obj = new PSON.Object();
-                    var keys = Object.keys(data);
+                    var keys = Object.keys(data), key;
                     for (i=0; i<keys.length; i++) {
-                        var key = keys[i];
-                        if (!this.dict.hasOwnProperty(key)) {
-                            this.dict[key] = this.next;
-                            this.stack.push(key);
-                            value.obj.ref.push(this.next++);
+                        key = keys[i];
+                        if (frozen || !!data["$PSONfz"]) {
+                            value.obj.key.push(key);
+                            value.obj.val.push(this._encodeValue(data[key], true));
                         } else {
-                            value.obj.ref.push(this.dict[key]);
+                            if (!this.dict.hasOwnProperty(key)) {
+                                this.dict[key] = this.next;
+                                this.stack.push(key);
+                                value.obj.ref.push(this.next++);
+                            } else {
+                                value.obj.ref.push(this.dict[key]);
+                            }
+                            value.obj.val.push(this._encodeValue(data[key]));
                         }
-                        value.obj.val.push(this._encodeValue(data[key]));
                     }
                 }
                 break;

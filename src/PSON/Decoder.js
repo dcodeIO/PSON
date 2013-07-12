@@ -37,17 +37,23 @@ Decoder.prototype._decodeValue = function(value) {
     } else if (value.udf === true) {
         return undefined;
     } else if (value.obj !== null) {
-        var obj = {};
-        for (var i=0; i<value.obj.ref.length; i++) {
-            var ref = value.obj.ref[i];
-            var key = this.dict[ref];
-            obj[key] = this._decodeValue(value.obj.val[i]);
+        var obj = {}, i;
+        if (value.obj.ref.length > 0) {
+            for (i=0; i<value.obj.ref.length; i++) {
+                var ref = value.obj.ref[i];
+                var key = this.dict[ref];
+                obj[key] = this._decodeValue(value.obj.val[i]);
+            }
+        } else {
+            for (i=0; i<value.obj.key.length; i++) {
+                obj[value.obj.key[i]] = this._decodeValue(value.obj.val[i]);
+            }
         }
         return obj;
     } else if (value.arr !== null) {
         var arr = [];
-        for (var i=0; i<value.arr.val.length; i++) {
-            arr.push(this._decodeValue(value.arr.val[i]));
+        for (var j=0; j<value.arr.val.length; j++) {
+            arr.push(this._decodeValue(value.arr.val[j]));
         }
         return arr;
     } else if (value.str !== null) {

@@ -46,6 +46,26 @@
              */
             this.decoder = new PSON.Decoder(values);
         };
+
+        /**
+         * Freezes an object, preventing its keys from being added to the dictionary when encoded.
+         * @param {Object} obj
+         */
+        PSON.freeze = function(obj) {
+            if (typeof obj === 'object') {
+                Object.defineProperty(obj, "$PSONfz", { value: true, enumerable: false });
+            }
+        };
+
+        /**
+         * Unfreezes an object, allowing its keys being added to the dictionary again when encoded.
+         * @param {Object} obj
+         */
+        PSON.unfreeze = function(obj) {
+            if (typeof obj === 'object') {
+                delete obj["$psonf"];
+            }
+        };
     
         var proto = ProtoBuf.newBuilder()["import"](
             // #include "PSON.json"
@@ -87,10 +107,29 @@
         PSON.prototype.encode = function(json) {
             return this.encoder.encode(json);
         };
+
+        /**
+         * Encodes JSON to PSON using this instance's encoder.
+         * @param {*} json JSON
+         * @returns {Buffer} PSON
+         * @throws {Error} If not running on node.js
+         */
+        PSON.prototype.toBuffer = function(json) {
+            return this.encode(json).toBuffer();
+        };
+
+        /**
+         * Encodes JSON to PSON using this instance's encoder.
+         * @param {*} json JSON
+         * @returns {ArrayBuffer} PSON
+         */
+        PSON.prototype.toArrayBuffer = function(json) {
+            return this.encode(json).toArraybuffer();
+        };
     
         /**
          * Decodes PSON to JSON using this instance's decoder.
-         * @param {ByteBuffer} pson PSON
+         * @param {ByteBuffer|Buffer|ArrayBuffer} pson PSON
          * @returns {*} JSON
          */
         PSON.prototype.decode = function(pson) {

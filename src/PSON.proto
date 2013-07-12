@@ -6,21 +6,23 @@ message Message {
 }
 
 message Value {
-    optional uint32 ref = 1; // dictionary reference
-    optional bool   udf = 2; // undefined
-    optional Object obj = 3; // Object
-    optional Array  arr = 4; // Array
-    optional string str = 5; // string
-    optional int32  itg = 6; // integer
-    optional float  flt = 7; // float, not yet used
-    optional double dbl = 8; // double
-    optional bool   bln = 9; // boolean
-                             // null if nothing is set
+    optional uint32 ref =  1; // dictionary reference
+    optional bool   udf =  2; // undefined
+    optional Object obj =  3; // Object
+    optional Array  arr =  4; // Array
+    optional string str =  5; // string
+    optional int32  itg =  6; // integer
+    optional float  flt =  7; // float, not yet used
+    optional double dbl =  8; // double
+    optional bool   bln =  9; // boolean
+    optional bytes  byt = 10; // bytes, not yet used
+                              // null if nothing is set
 }
 
 message Object {
     repeated uint32 ref = 1 [packed=true]; // key dictionary references
-    repeated Value  val = 2 [packed=true]; // values
+    repeated string key = 2 [packed=true]; // XOR: key strings
+    repeated Value  val = 3 [packed=true]; // values
 }
 
 message Array {

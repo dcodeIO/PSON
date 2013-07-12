@@ -46,6 +46,26 @@
              */
             this.decoder = new PSON.Decoder(values);
         };
+
+        /**
+         * Freezes an object, preventing its keys from being added to the dictionary when encoded.
+         * @param {Object} obj
+         */
+        PSON.freeze = function(obj) {
+            if (typeof obj === 'object') {
+                Object.defineProperty(obj, "$PSONfz", { value: true, enumerable: false });
+            }
+        };
+
+        /**
+         * Unfreezes an object, allowing its keys being added to the dictionary again when encoded.
+         * @param {Object} obj
+         */
+        PSON.unfreeze = function(obj) {
+            if (typeof obj === 'object') {
+                delete obj["$psonf"];
+            }
+        };
     
         var proto = ProtoBuf.newBuilder()["import"](
             {
@@ -140,6 +160,13 @@
                                 "name": "bln",
                                 "id": 9,
                                 "options": {}
+                            },
+                            {
+                                "rule": "optional",
+                                "type": "bytes",
+                                "name": "byt",
+                                "id": 10,
+                                "options": {}
                             }
                         ],
                         "enums": [],
@@ -160,9 +187,18 @@
                             },
                             {
                                 "rule": "repeated",
+                                "type": "string",
+                                "name": "key",
+                                "id": 2,
+                                "options": {
+                                    "packed": "true"
+                                }
+                            },
+                            {
+                                "rule": "repeated",
                                 "type": "Value",
                                 "name": "val",
-                                "id": 2,
+                                "id": 3,
                                 "options": {
                                     "packed": "true"
                                 }
@@ -268,10 +304,11 @@
         /**
          * Encodes a single JSON value to PSON. If the data cannot be encoded, a NULL-value is returned.
          * @param {*} data JSON
+         * @param {boolean=} frozen Whether a parent object is already frozen
          * @returns {PSON.Value} PSON value
          * @private
          */
-        Encoder.prototype._encodeValue = function(data) {
+        Encoder.prototype._encodeValue = function(data, frozen) {
             var value = new PSON.Value(), i;
             if (data !== null) {
                 switch (typeof data) {
@@ -301,17 +338,22 @@
                             }
                         } else {
                             value.obj = new PSON.Object();
-                            var keys = Object.keys(data);
+                            var keys = Object.keys(data), key;
                             for (i=0; i<keys.length; i++) {
-                                var key = keys[i];
-                                if (!this.dict.hasOwnProperty(key)) {
-                                    this.dict[key] = this.next;
-                                    this.stack.push(key);
-                                    value.obj.ref.push(this.next++);
+                                key = keys[i];
+                                if (frozen || !!data["$PSONfz"]) {
+                                    value.obj.key.push(key);
+                                    value.obj.val.push(this._encodeValue(data[key], true));
                                 } else {
-                                    value.obj.ref.push(this.dict[key]);
+                                    if (!this.dict.hasOwnProperty(key)) {
+                                        this.dict[key] = this.next;
+                                        this.stack.push(key);
+                                        value.obj.ref.push(this.next++);
+                                    } else {
+                                        value.obj.ref.push(this.dict[key]);
+                                    }
+                                    value.obj.val.push(this._encodeValue(data[key]));
                                 }
-                                value.obj.val.push(this._encodeValue(data[key]));
                             }
                         }
                         break;
@@ -365,17 +407,23 @@
             } else if (value.udf === true) {
                 return undefined;
             } else if (value.obj !== null) {
-                var obj = {};
-                for (var i=0; i<value.obj.ref.length; i++) {
-                    var ref = value.obj.ref[i];
-                    var key = this.dict[ref];
-                    obj[key] = this._decodeValue(value.obj.val[i]);
+                var obj = {}, i;
+                if (value.obj.ref.length > 0) {
+                    for (i=0; i<value.obj.ref.length; i++) {
+                        var ref = value.obj.ref[i];
+                        var key = this.dict[ref];
+                        obj[key] = this._decodeValue(value.obj.val[i]);
+                    }
+                } else {
+                    for (i=0; i<value.obj.key.length; i++) {
+                        obj[value.obj.key[i]] = this._decodeValue(value.obj.val[i]);
+                    }
                 }
                 return obj;
             } else if (value.arr !== null) {
                 var arr = [];
-                for (var i=0; i<value.arr.val.length; i++) {
-                    arr.push(this._decodeValue(value.arr.val[i]));
+                for (var j=0; j<value.arr.val.length; j++) {
+                    arr.push(this._decodeValue(value.arr.val[j]));
                 }
                 return arr;
             } else if (value.str !== null) {
@@ -404,10 +452,29 @@
         PSON.prototype.encode = function(json) {
             return this.encoder.encode(json);
         };
+
+        /**
+         * Encodes JSON to PSON using this instance's encoder.
+         * @param {*} json JSON
+         * @returns {Buffer} PSON
+         * @throws {Error} If not running on node.js
+         */
+        PSON.prototype.toBuffer = function(json) {
+            return this.encode(json).toBuffer();
+        };
+
+        /**
+         * Encodes JSON to PSON using this instance's encoder.
+         * @param {*} json JSON
+         * @returns {ArrayBuffer} PSON
+         */
+        PSON.prototype.toArrayBuffer = function(json) {
+            return this.encode(json).toArraybuffer();
+        };
     
         /**
          * Decodes PSON to JSON using this instance's decoder.
-         * @param {ByteBuffer} pson PSON
+         * @param {ByteBuffer|Buffer|ArrayBuffer} pson PSON
          * @returns {*} JSON
          */
         PSON.prototype.decode = function(pson) {

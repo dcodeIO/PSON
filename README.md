@@ -78,6 +78,18 @@ someSocket.on("data", function(data) {
 });
 ```
 
+API
+---
+The API is pretty much straight forward:
+
+* `new PSON([initialDictionary: Array.<string>])` constructs a new combined encoder and decoder
+* `PSON#encode(json: *): ByteBuffer` encodes JSON to PSON data
+  * `PSON#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
+  * `PSON#toArrayBuffer(json: *): ArrayBuffer` encodes straight to an ArrayBuffer
+* `PSON#decode(pson: ByteBuffer|Buffer|ArrayBuffer): *` decodes PSON data to JSON
+* `PSON.freeze(obj: Object)` Freezes an object, preventing its keys from being added to the dictionary when encoded
+* `PSON.unfreeze(obj: Object)` Unfreezes an object, allowing its keys to be added to the dictionary again when encoded
+
 Behind the love
 ---------------
 The idea behind PSON is to keep a common dictionary containing keys to integer mappings on both ends. This is similar to
@@ -113,7 +125,12 @@ which is
 * **151 bytes** after the first `PSON#encode` including the dictionary and
 * **78 bytes** after each subsequent `PSON#encode`
 
-which is, in this case, from the second message onwards about **40% smaller than JSON**.
+which is, in this case, from the second message onwards about **40% smaller than JSON**, or
+
+* **122 bytes** after each `PSON#encode` if the data object has been frozen through `PSON.freeze` (disabled the
+  dictionary for this object)
+  
+which is, in this case and without any compression attempts, still about **7% smaller than JSON**.
 
 Documentation
 -------------
