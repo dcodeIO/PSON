@@ -53,7 +53,11 @@
          */
         PSON.freeze = function(obj) {
             if (typeof obj === 'object') {
-                Object.defineProperty(obj, "$PSONfz", { value: true, enumerable: false });
+                Object.defineProperty(obj, "_PSON_FROZEN_", {
+                    value: true,
+                    enumerable: false,
+                    configurable: true
+                });
             }
         };
 
@@ -63,7 +67,7 @@
          */
         PSON.unfreeze = function(obj) {
             if (typeof obj === 'object') {
-                delete obj["$psonf"];
+                delete obj["_PSON_FROZEN_"];
             }
         };
     

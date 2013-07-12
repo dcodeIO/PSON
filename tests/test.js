@@ -14,21 +14,27 @@ var data = {
     },
     "arr": [1,2,3]
 };
-var bb = pson.encode(data).compact();
-pson.decode(bb); // dict is now ["hello", "time", "float", "boolean", "otherbool", "null", "obj", "what", "arr"]
-var nDict = bb.length;
-bb = pson.encode(data).compact();
-var nAgain = bb.length;
-var decData = pson.decode(bb);
-assert.deepEqual(data, decData);
+var bb;
+
 PSON.freeze(data);
 bb = pson.encode(data).compact();
-var nFreeze = bb.length;
+var nFrozen = bb.length;
+
+PSON.unfreeze(data);
+bb = pson.encode(data).compact();
+var nDict = bb.length;
+pson.decode(bb); // dict is now ["hello", "time", "float", "boolean", "otherbool", "null", "obj", "what", "arr"]
+
+bb = pson.encode(data).compact();
+var nAgain = bb.length;
+
+var decData = pson.decode(bb);
+assert.deepEqual(data, decData);
 
 // console.log("Dec", pson.decoder.dict);
 // console.log("Enc", pson.encoder.dict);
 
-console.log("OK: JSON="+JSON.stringify(data).length+", PSON="+nDict+" with initial dict, "+nAgain+" subsequently ("+nFreeze+" when frozen)");
+console.log("OK: JSON="+JSON.stringify(data).length+", PSON="+nDict+" with initial dict, "+nAgain+" subsequently ("+nFrozen+" when frozen)");
 
 /**
  12 id=2 (data), wt=2

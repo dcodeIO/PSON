@@ -82,6 +82,7 @@ API
 ---
 The API is pretty much straight forward:
 
+#### PSON
 * `new PSON([initialDictionary: Array.<string>])` constructs a new combined encoder and decoder
 * `PSON#encode(json: *): ByteBuffer` encodes JSON to PSON data
   * `PSON#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
@@ -89,13 +90,19 @@ The API is pretty much straight forward:
 * `PSON#decode(pson: ByteBuffer|Buffer|ArrayBuffer): *` decodes PSON data to JSON
 * `PSON.freeze(obj: Object)` Freezes an object, preventing its keys from being added to the dictionary when encoded
 * `PSON.unfreeze(obj: Object)` Unfreezes an object, allowing its keys to be added to the dictionary again when encoded
+* `PSON#encoder: PSON.Encoder` Encoder instance
+* `PSON#decoder: PSON.Decoder` Decoder instance
+
+#### PSON.Encoder
+* `PSON.Encoder#freeze()`: Freezes the encoding dictionary, preventing any keys to be added (useful for static dicts)
+* `PSON.Encoder#unfreeze()`: Unfreezes the encoding dictionary, allowing keys to be added again
 
 Behind the love
 ---------------
 The idea behind PSON is to keep a common dictionary containing keys to integer mappings on both ends. This is similar to
 how ZIP archives work and trades some memory for a smaller packet size. The dictionary allows us to shorten any keywords
 to be represented by a single byte (in an optimal case). As a result the exact string representing a keyword needs to be
-submitted only once, making each subsequent message considerably smaller - in theory. Additionally, ProtoBuf's varint
+transmitted only once, making each subsequent message considerably smaller - in theory. Additionally, ProtoBuf's varint
 encoding is great for submitting numeric values - in practice - and the `initialDictionary` parameter even allows to
 start off with arbitrary string values (for keys _and_ values). Therefore, an ideal use case for PSON is to use it as
 a drop-in replacement for an existing mostly static JSON protocol.
