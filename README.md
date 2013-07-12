@@ -3,11 +3,11 @@
 You **love** JSON for its simplicity but **hate** it for its network overhead?  
 You **love** ProtoBuf for its small packet size but **hate** it for its complexity?
 
-*Can't there be solely love?*
+*Can't there solely be love?*
 
 Yes it can!
 -----------
-PSON is a binary serialization format built on the simplicity of JSON and the encoding capabilities of
+**PSON** is a binary serialization format built on the simplicity of JSON and the encoding capabilities of
 [ProtoBuf.js](https://github.com/dcodeIO/ProtoBuf.js).
 
 Usage
