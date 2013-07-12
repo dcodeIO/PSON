@@ -80,11 +80,12 @@ someSocket.on("data", function(data) {
 Behind the love
 ---------------
 The idea behind PSON is to keep a common dictionary containing keys to integer mappings on both ends. This is similar to
-how ZIP archives work. The dictionary allows us to shorten any keywords to be represented by a single byte (in an optimal
-case). As a result the exact string representing a keyword needs to be submitted only once, making each subsequent
-message considerably smaller - in theory. Additionally, ProtoBuf's varint encoding is great for submitting
-numeric values - in practice - and the `initialDictionary` parameter even allows to start off with arbitrary string
-values (for keys _and_ values).
+how ZIP archives work and trades some memory for a smaller packet size. The dictionary allows us to shorten any keywords
+to be represented by a single byte (in an optimal case). As a result the exact string representing a keyword needs to be
+submitted only once, making each subsequent message considerably smaller - in theory. Additionally, ProtoBuf's varint
+encoding is great for submitting numeric values - in practice - and the `initialDictionary` parameter even allows to
+start off with arbitrary string values (for keys _and_ values). Therefore, an ideal use case for PSON is to use it as
+a drop-in replacement for an existing mostly static JSON protocol.
 
 Comparison
 ----------
