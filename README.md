@@ -60,7 +60,7 @@ Example
 -------
 ```js
 // Sender
-var initialDictionary = {...};
+var initialDictionary = [ ... ];
 var pson = new PSON(initialDictionary);
 var data = { "hello": "world!" };
 var buffer = pson.encode(data);
@@ -69,7 +69,8 @@ someSocket.send(buffer);
 
 ```js
 // Receiver
-var pson = new PSON();
+var initialDictionary = [ same! ];
+var pson = new PSON(initialDictionary);
 someSocket.on("data", function(data) {
     data = pson.decode(data);
     ...
