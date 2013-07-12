@@ -56,9 +56,7 @@ Encoder.prototype.unfreeze = function() {
 Encoder.prototype.encode = function(data) {
     var value = this._encodeValue(data, this.frozen);
     var msg = new PSON.Message();
-    while (this.stack.length > 0) {
-        msg.dict.push(new PSON.Value( {"str": this.stack.shift()} ));
-    }
+    msg.dict = this.stack; this.stack = [];
     msg.data = value;
     return msg.encode();
 };
@@ -74,9 +72,8 @@ Encoder.prototype._encodeValue = function(data, frozen) {
     var value = new PSON.Value(), i;
     if (data !== null) {
         switch (typeof data) {
-            case 'undefined':
-                value.udf = true;
-                break;
+            case 'function':
+                data = data.toString();
             case 'string':
                 if (this.dict.hasOwnProperty(data)) {
                     value.ref = this.dict[data];
@@ -105,21 +102,23 @@ Encoder.prototype._encodeValue = function(data, frozen) {
                     var keys = Object.keys(data), key;
                     for (i=0; i<keys.length; i++) {
                         key = keys[i];
-                        if (this.dict.hasOwnProperty(key)) { // Always use the reference if it already exists
-                            value.obj.ref.push(this.dict[key]);
-                        } else {
-                            if (frozen) { // Skip dictionary if frozen
-                                value.obj.key.push(key);
+                        if (typeof data[key] !== 'undefined') { // Undefined is skipped
+                            if (this.dict.hasOwnProperty(key)) { // Use the reference if it already exists
+                                value.obj.ref.push(this.dict[key]);
                             } else {
-                                this.dict[key] = this.next;
-                                this.stack.push(key);
-                                value.obj.ref.push(this.next++);
+                                if (frozen) { // Skip dictionary if frozen
+                                    value.obj.key.push(key);
+                                } else {
+                                    this.dict[key] = this.next;
+                                    this.stack.push(key);
+                                    value.obj.ref.push(this.next++);
+                                }
                             }
+                            value.obj.val.push(this._encodeValue(data[key], frozen));
                         }
-                        value.obj.val.push(this._encodeValue(data[key], frozen));
                     }
+                    // TODO: binary data
                 }
-                // TODO: binary data
                 break;
             case 'boolean':
                 value.bln = data;

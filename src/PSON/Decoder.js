@@ -20,7 +20,7 @@ var Decoder = function(values) {
 Decoder.prototype.decode = function(buffer) {
     var msg = PSON.Message.decode(buffer);
     for (var i=0; i<msg.dict.length; i++) {
-        this.dict.push(msg.dict[i].str);
+        this.dict.push(msg.dict[i]);
     }
     return this._decodeValue(msg.data);
 };
@@ -34,8 +34,8 @@ Decoder.prototype.decode = function(buffer) {
 Decoder.prototype._decodeValue = function(value) {
     if (value.ref !== null) {
         return this.dict[value.ref]
-    } else if (value.udf === true) {
-        return undefined;
+    } else if (value.nil === true) {
+        return null;
     } else if (value.obj !== null) {
         var obj = {}, i;
         if (value.obj.ref.length > 0) {

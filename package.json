@@ -1,7 +1,7 @@
 {
     "name": "pson",
     "description": "A binary serialization format built on the simplicity of JSON and the encoding capabilities of ProtoBuf.",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "author": "Daniel Wirtz <dcode@dcode.io>",
     "main": "PSON.js",
     "repository": {

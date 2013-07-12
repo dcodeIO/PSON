@@ -116,7 +116,7 @@ As of today there is a minimalistic test case for the following data:
 {
     "hello": "world!",
     "time": 1234567890,
-    "float": 0.011,
+    "float": 0.01234,
     "boolean": true,
     "otherbool": false,
     "null": null,
@@ -129,16 +129,15 @@ As of today there is a minimalistic test case for the following data:
 
 which is
 
-* **131 bytes** large after `JSON.stringify`
-* **151 bytes** after the first `PSON#encode` including the dictionary and
+* **133 bytes** large after `JSON.stringify`
+* **133 bytes** after the first `PSON#encode` including the dictionary and
 * **78 bytes** after each subsequent `PSON#encode`
 
 which is, in this case, from the second message onwards about **40% smaller than JSON**, or
 
-* **122 bytes** after each `PSON#encode` if the data object has been frozen through `PSON.freeze` (disabled the
-  dictionary for this object)
+* **122 bytes** after each `PSON#encode` if the encoder or the data object has been frozen (dictionary disabled)
   
-which is, in this case and without any compression attempts, still about **7% smaller than JSON**.
+which is, in this case and without any compression attempts, still about 7% smaller than JSON.
 
 Documentation
 -------------

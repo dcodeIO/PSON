@@ -6,7 +6,7 @@
             "fields": [
                 {
                     "rule": "repeated",
-                    "type": "Value",
+                    "type": "string",
                     "name": "dict",
                     "id": 1,
                     "options": {
@@ -37,65 +37,58 @@
                 },
                 {
                     "rule": "optional",
-                    "type": "bool",
-                    "name": "udf",
-                    "id": 2,
-                    "options": {}
-                },
-                {
-                    "rule": "optional",
                     "type": "Object",
                     "name": "obj",
-                    "id": 3,
+                    "id": 2,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "Array",
                     "name": "arr",
-                    "id": 4,
+                    "id": 3,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "string",
                     "name": "str",
-                    "id": 5,
+                    "id": 4,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "int32",
                     "name": "itg",
-                    "id": 6,
+                    "id": 5,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "float",
                     "name": "flt",
-                    "id": 7,
+                    "id": 6,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "double",
                     "name": "dbl",
-                    "id": 8,
+                    "id": 7,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "bool",
                     "name": "bln",
-                    "id": 9,
+                    "id": 8,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "bytes",
                     "name": "byt",
-                    "id": 10,
+                    "id": 9,
                     "options": {}
                 }
             ],

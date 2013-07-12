@@ -1,30 +1,41 @@
+/**
+ * PSON (c) 2013 Daniel Wirtz
+ * Released under the Apache License, Version 2.0
+ * see: https://github.com/dcodeIO/PSON for details
+ */
 package PSON;
 
+// A PSON Message
 message Message {
-    repeated Value dict = 1 [packed=true]; // Dictionary entries
-    required Value data = 2; // The actual data
+    repeated string dict = 1 [packed=true]; // Zero or N new dictionary keywords in encoding order
+    required Value  data = 2;               // The actual data
 }
 
-message Value {
-    optional uint32 ref =  1; // dictionary reference
-    optional bool   udf =  2; // undefined
-    optional Object obj =  3; // Object
-    optional Array  arr =  4; // Array
-    optional string str =  5; // string
-    optional int32  itg =  6; // integer
-    optional float  flt =  7; // float, not yet used
-    optional double dbl =  8; // double
-    optional bool   bln =  9; // boolean
-    optional bytes  byt = 10; // bytes, not yet used
-                              // null if nothing is set
+// A PSON Value
+message Value { // Contains zero or exactly one of the following fields:
+
+                             // Description          | JS type
+                             // ----------------------------------
+    optional uint32 ref = 1; // Dictionary reference | string
+    optional Object obj = 2; // A PSON Object        | Object
+    optional Array  arr = 3; // A PSON Array         | Array
+    optional string str = 4; // An UTF-8 string      | string
+    optional int32  itg = 5; // A 32bit integer      | number
+    optional float  flt = 6; // A 32bit float        | number
+    optional double dbl = 7; // A 64bit double       | number
+    optional bool   bln = 8; // A boolean            | boolean
+    optional bytes  byt = 9; // Binary data          | ArrayBuffer
+                             // Empty                | null
 }
 
+// A PSON Object
 message Object {
-    repeated uint32 ref = 1 [packed=true]; // key dictionary references
-    repeated string key = 2 [packed=true]; // XOR: key strings
-    repeated Value  val = 3 [packed=true]; // values
+    repeated uint32 ref = 1 [packed=true]; // EITHER: Zero to N dictionary references -> string
+    repeated string key = 2 [packed=true]; //     OR: Zero to N plain text keys
+    repeated Value  val = 3 [packed=true]; // Zero to N values using the keys from above with the same index
 }
 
+// A PSON Array
 message Array {
-    repeated Value val = 1 [packed=true];
+    repeated Value val = 1 [packed=true]; // Zero to N values
 }

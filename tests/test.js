@@ -5,7 +5,7 @@ var pson = new PSON();
 var data = {
     "hello": "world!",
     "time": 1234567890,
-    "float": 0.011,
+    "float": 0.01234,
     "boolean": true,
     "otherbool": false,
     "null": null,
@@ -16,17 +16,24 @@ var data = {
 };
 var bb;
 
+var json = JSON.stringify(data);
+console.log("JSON: "+json+" ("+json.length+")\n");
+assert.deepEqual(JSON.parse(json), data);
+
 PSON.freeze(data);
 bb = pson.encode(data).compact();
 var nFrozen = bb.length;
+console.log("FROZEN:"); bb.printDebug();
 
 PSON.unfreeze(data);
 bb = pson.encode(data).compact();
 var nDict = bb.length;
-pson.decode(bb); // dict is now ["hello", "time", "float", "boolean", "otherbool", "null", "obj", "what", "arr"]
+console.log("WITH INITIAL DICT:"); bb.printDebug();
+pson.decode(bb);
 
 bb = pson.encode(data).compact();
 var nAgain = bb.length;
+console.log("AGAIN USING DICT:"); bb.printDebug();
 
 var decData = pson.decode(bb);
 assert.deepEqual(data, decData);
@@ -34,7 +41,7 @@ assert.deepEqual(data, decData);
 // console.log("Dec", pson.decoder.dict);
 // console.log("Enc", pson.encoder.dict);
 
-console.log("OK: JSON="+JSON.stringify(data).length+", PSON="+nDict+" with initial dict, "+nAgain+" subsequently ("+nFrozen+" when frozen)");
+console.log("OK");
 
 /**
  12 id=2 (data), wt=2

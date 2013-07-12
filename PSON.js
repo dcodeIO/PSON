@@ -80,7 +80,7 @@
                         "fields": [
                             {
                                 "rule": "repeated",
-                                "type": "Value",
+                                "type": "string",
                                 "name": "dict",
                                 "id": 1,
                                 "options": {
@@ -111,65 +111,58 @@
                             },
                             {
                                 "rule": "optional",
-                                "type": "bool",
-                                "name": "udf",
-                                "id": 2,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
                                 "type": "Object",
                                 "name": "obj",
-                                "id": 3,
+                                "id": 2,
                                 "options": {}
                             },
                             {
                                 "rule": "optional",
                                 "type": "Array",
                                 "name": "arr",
-                                "id": 4,
+                                "id": 3,
                                 "options": {}
                             },
                             {
                                 "rule": "optional",
                                 "type": "string",
                                 "name": "str",
-                                "id": 5,
+                                "id": 4,
                                 "options": {}
                             },
                             {
                                 "rule": "optional",
                                 "type": "int32",
                                 "name": "itg",
-                                "id": 6,
+                                "id": 5,
                                 "options": {}
                             },
                             {
                                 "rule": "optional",
                                 "type": "float",
                                 "name": "flt",
-                                "id": 7,
+                                "id": 6,
                                 "options": {}
                             },
                             {
                                 "rule": "optional",
                                 "type": "double",
                                 "name": "dbl",
-                                "id": 8,
+                                "id": 7,
                                 "options": {}
                             },
                             {
                                 "rule": "optional",
                                 "type": "bool",
                                 "name": "bln",
-                                "id": 9,
+                                "id": 8,
                                 "options": {}
                             },
                             {
                                 "rule": "optional",
                                 "type": "bytes",
                                 "name": "byt",
-                                "id": 10,
+                                "id": 9,
                                 "options": {}
                             }
                         ],
@@ -318,9 +311,7 @@
         Encoder.prototype.encode = function(data) {
             var value = this._encodeValue(data, this.frozen);
             var msg = new PSON.Message();
-            while (this.stack.length > 0) {
-                msg.dict.push(new PSON.Value( {"str": this.stack.shift()} ));
-            }
+            msg.dict = this.stack; this.stack = [];
             msg.data = value;
             return msg.encode();
         };
@@ -336,9 +327,8 @@
             var value = new PSON.Value(), i;
             if (data !== null) {
                 switch (typeof data) {
-                    case 'undefined':
-                        value.udf = true;
-                        break;
+                    case 'function':
+                        data = data.toString();
                     case 'string':
                         if (this.dict.hasOwnProperty(data)) {
                             value.ref = this.dict[data];
@@ -367,21 +357,23 @@
                             var keys = Object.keys(data), key;
                             for (i=0; i<keys.length; i++) {
                                 key = keys[i];
-                                if (this.dict.hasOwnProperty(key)) { // Always use the reference if it already exists
-                                    value.obj.ref.push(this.dict[key]);
-                                } else {
-                                    if (frozen) { // Skip dictionary if frozen
-                                        value.obj.key.push(key);
+                                if (typeof data[key] !== 'undefined') { // Undefined is skipped
+                                    if (this.dict.hasOwnProperty(key)) { // Use the reference if it already exists
+                                        value.obj.ref.push(this.dict[key]);
                                     } else {
-                                        this.dict[key] = this.next;
-                                        this.stack.push(key);
-                                        value.obj.ref.push(this.next++);
+                                        if (frozen) { // Skip dictionary if frozen
+                                            value.obj.key.push(key);
+                                        } else {
+                                            this.dict[key] = this.next;
+                                            this.stack.push(key);
+                                            value.obj.ref.push(this.next++);
+                                        }
                                     }
+                                    value.obj.val.push(this._encodeValue(data[key], frozen));
                                 }
-                                value.obj.val.push(this._encodeValue(data[key], frozen));
                             }
+                            // TODO: binary data
                         }
-                        // TODO: binary data
                         break;
                     case 'boolean':
                         value.bln = data;
@@ -416,7 +408,7 @@
         Decoder.prototype.decode = function(buffer) {
             var msg = PSON.Message.decode(buffer);
             for (var i=0; i<msg.dict.length; i++) {
-                this.dict.push(msg.dict[i].str);
+                this.dict.push(msg.dict[i]);
             }
             return this._decodeValue(msg.data);
         };
@@ -430,8 +422,8 @@
         Decoder.prototype._decodeValue = function(value) {
             if (value.ref !== null) {
                 return this.dict[value.ref]
-            } else if (value.udf === true) {
-                return undefined;
+            } else if (value.nil === true) {
+                return null;
             } else if (value.obj !== null) {
                 var obj = {}, i;
                 if (value.obj.ref.length > 0) {
