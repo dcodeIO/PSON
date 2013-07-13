@@ -26,19 +26,23 @@
         if (!ProtoBuf) {
             throw(new Error("PSON requires ProtoBuf.js: Get it at https://github.com/dcodeIO/ProtoBuf.js"));
         }
+        var ByteBuffer = ProtoBuf.ByteBuffer;
+        var Long = ProtoBuf.Long;
 
         /**
          * Constructs a new combined PSON encoder and decoder.
          * @param {Array.<string>=} values Initial dictionary values
+         * @param {boolean=} freezeEncoder Whether to freeze the encoder's dictionary, defaults to `false`
          * @constructor
          */
-        var PSON = function(values) {
+        var PSON = function(values, freezeEncoder) {
     
             /**
              * PSON encoder.
              * @type {PSON.Encoder}
              */
             this.encoder = new PSON.Encoder(values);
+            if (!!freezeEncoder) this.encoder.freeze();
     
             /**
              * PSON decoder.
@@ -80,18 +84,18 @@
          * @type {Function}
          */
         PSON.Message = proto.Message;
-    
+
+        /**
+         * PSON special types.
+         * @type {Object.<string,number>}
+         */
+        PSON.Special = proto.Special;
+        
         /**
          * PSON value class.
          * @type {Function}
          */
         PSON.Value = proto.Value;
-    
-        /**
-         * PSON array class.
-         * @type {Function}
-         */
-        PSON.Array = proto.Array;
     
         /**
          * PSON object class.

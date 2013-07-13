@@ -20,8 +20,7 @@ Usage
 
 ```js
 var PSON = require("pson");
-var initialDictionary = {...};
-var pson = new PSON(initialDictionary);
+var pson = new PSON();
 ...
 ```
 
@@ -83,7 +82,7 @@ API
 The API is pretty much straight forward:
 
 #### PSON
-* `new PSON([initialDictionary: Array.<string>])` constructs a new combined encoder and decoder
+* `new PSON([initialDictionary: Array.<string>[, freezeEncoder: boolean]])` constructs a new combined encoder and decoder
 * `PSON#encode(json: *): ByteBuffer` encodes JSON to PSON data
   * `PSON#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
   * `PSON#toArrayBuffer(json: *): ArrayBuffer` encodes straight to an ArrayBuffer
@@ -130,24 +129,21 @@ As of today there is a minimalistic test case for the following data:
 which is
 
 * **133 bytes** large after `JSON.stringify`
-* **133 bytes** after the first `PSON#encode` including the dictionary and
-* **78 bytes** after each subsequent `PSON#encode`
+* **132 bytes** after the first `PSON#encode` including the dictionary and
+* **77 bytes** after each subsequent `PSON#encode`
 
-which is, in this case, from the second message onwards about **40% smaller than JSON**, or
+which is, in this case, from the second message onwards about **42% smaller than JSON**, or
 
-* **122 bytes** after each `PSON#encode` if the encoder or the data object has been frozen (dictionary disabled)
+* **121 bytes** after each `PSON#encode` if the encoder or the data object has been frozen (dictionary disabled)
   
-which is, in this case and without any compression attempts, still about 7% smaller than JSON.
+which is, in this case and without any compression attempts, still about 9% smaller than JSON.
 
 Documentation
 -------------
-* [Fully documented source code](https://github.com/dcodeIO/PSON/tree/master/src)
-* The [PSON.proto](https://github.com/dcodeIO/PSON/blob/master/src/PSON.proto) is also freely available and it should
+* [Documented sources](https://github.com/dcodeIO/PSON/tree/master/src)
+* [PSON.proto](https://github.com/dcodeIO/PSON/blob/master/src/PSON.proto) definition. It should
   be quite easy to implement the protocol in a variety of programming languages using your favourite
   [protobuf library](http://code.google.com/p/protobuf/wiki/ThirdPartyAddOns).
 * [Background reading](https://github.com/dcodeIO/ProtoBuf.js/wiki/ProtoBuf.js-vs-JSON)
-
-**Note:** I just started working on this and I am not yet sure if this is a great idea or just another waste of time.
-However, if you are interested in the topic, feel free to try it out, make contact or even to run some benchmarks.
 
 **License:** [Apache License, Version 2.0](http://opensource.org/licenses/Apache-2.0)

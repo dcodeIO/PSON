@@ -32,16 +32,31 @@ Decoder.prototype.decode = function(buffer) {
  * @private
  */
 Decoder.prototype._decodeValue = function(value) {
-    if (value.ref !== null) {
-        return this.dict[value.ref]
-    } else if (value.nil === true) {
-        return null;
+    if (value.spc) {
+        switch (value.spc) {
+            case PSON.Special.TRUE:
+                return true;
+            case PSON.Special.FALSE:
+                return false;
+            case PSON.Special.EOBJ:
+                return {};
+            case PSON.Special.EARR:
+                return [];
+            case PSON.Special.ESTR:
+                return "";
+            case PSON.Special.EBIN:
+                return new ByteBuffer(0);
+            case PSON.Special.UDEF:
+                return undefined;
+        }
+    } else if (value.dic !== null) {
+        return this.dict[value.dic]
     } else if (value.obj !== null) {
         var obj = {}, i;
-        if (value.obj.ref.length > 0) {
-            for (i=0; i<value.obj.ref.length; i++) {
-                var ref = value.obj.ref[i];
-                var key = this.dict[ref];
+        if (value.obj.dic.length > 0) {
+            for (i=0; i<value.obj.dic.length; i++) {
+                var dic = value.obj.dic[i];
+                var key = this.dict[dic];
                 obj[key] = this._decodeValue(value.obj.val[i]);
             }
         } else {
@@ -50,10 +65,10 @@ Decoder.prototype._decodeValue = function(value) {
             }
         }
         return obj;
-    } else if (value.arr !== null) {
+    } else if (value.arr.length > 0) {
         var arr = [];
-        for (var j=0; j<value.arr.val.length; j++) {
-            arr.push(this._decodeValue(value.arr.val[j]));
+        for (var j=0; j<value.arr.length; j++) {
+            arr.push(this._decodeValue(value.arr[j]));
         }
         return arr;
     } else if (value.str !== null) {
@@ -64,8 +79,8 @@ Decoder.prototype._decodeValue = function(value) {
         return value.flt;
     } else if (value.dbl !== null) {
         return value.dbl;
-    } else if (value.bln !== null) {
-        return value.bln;
+    } else if (value.bin !== null) {
+        return value.bin; // ByteBuffer
     } else {
         return null;
     }

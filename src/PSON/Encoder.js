@@ -75,7 +75,9 @@ Encoder.prototype._encodeValue = function(data, frozen) {
             case 'function':
                 data = data.toString();
             case 'string':
-                if (this.dict.hasOwnProperty(data)) {
+                if (data === "") {
+                    value.spc = PSON.Special.ESTR;
+                } else if (this.dict.hasOwnProperty(data)) {
                     value.ref = this.dict[data];
                 } else {
                     value.str = data;
@@ -86,45 +88,64 @@ Encoder.prototype._encodeValue = function(data, frozen) {
                 if (data === maybeInt) {
                     value.itg = maybeInt;
                 } else {
+                    // TODO: float if possible without precision loss
                     value.dbl = data;
                 }
-                // TODO: float if possible without precision loss
                 break;
             case 'object':
                 frozen = frozen || !!data["_PSON_FROZEN_"];
                 if (Array.isArray(data)) {
-                    value.arr = new PSON.Array();
-                    for (i=0; i<data.length; i++) {
-                        value.arr.val.push(this._encodeValue(data[i], frozen));
-                    }
-                } else {
-                    value.obj = new PSON.Object();
-                    var keys = Object.keys(data), key;
-                    for (i=0; i<keys.length; i++) {
-                        key = keys[i];
-                        if (typeof data[key] !== 'undefined') { // Undefined is skipped
-                            if (this.dict.hasOwnProperty(key)) { // Use the reference if it already exists
-                                value.obj.ref.push(this.dict[key]);
-                            } else {
-                                if (frozen) { // Skip dictionary if frozen
-                                    value.obj.key.push(key);
-                                } else {
-                                    this.dict[key] = this.next;
-                                    this.stack.push(key);
-                                    value.obj.ref.push(this.next++);
-                                }
-                            }
-                            value.obj.val.push(this._encodeValue(data[key], frozen));
+                    if (data.length == 0) {
+                        value.spc = PSON.Special.EARR;
+                    } else {
+                        value.arr = [];
+                        for (i=0; i<data.length; i++) {
+                            value.arr.push(this._encodeValue(data[i], frozen));
                         }
                     }
-                    // TODO: binary data
+                } else {
+                    try {
+                        var bin = ByteBuffer.wrap(data);
+                        if (bin.length == 0) {
+                            value.spc = PSON.Special.EBIN;
+                        } else {
+                            value.bin = bin;
+                        }                        
+                    } catch (notBin) {
+                        var keys = Object.keys(data), key;
+                        if (keys.length == 0) {
+                            value.spc = PSON.Special.EOBJ;
+                        } else {
+                            value.obj = new PSON.Object();
+                            for (i=0; i<keys.length; i++) {
+                                key = keys[i];
+                                if (typeof data[key] !== 'undefined') { // Undefined is skipped
+                                    if (frozen) { // Skip dictionary if frozen
+                                        value.obj.key.push(key);
+                                    } else {
+                                        if (!this.dict.hasOwnProperty(key)) {
+                                            this.dict[key] = this.next;
+                                            this.stack.push(key);
+                                            value.obj.dic.push(this.next++);
+                                        } else {
+                                            value.obj.dic.push(this.dict[key]);
+                                        }
+                                    }
+                                    value.obj.val.push(this._encodeValue(data[key], frozen));
+                                }
+                            }
+                        }
+                    }
                 }
                 break;
             case 'boolean':
-                value.bln = data;
+                value.spc = data ? PSON.Special.TRUE : PSON.Special.FALSE;
+                break;
+            case 'undefined':
+                value.spc = PSON.Special.UDEF;
                 break;
         }
-    }
+    } // else null
     return value;
 };
 

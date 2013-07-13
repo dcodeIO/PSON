@@ -30,64 +30,64 @@
             "fields": [
                 {
                     "rule": "optional",
-                    "type": "uint32",
-                    "name": "ref",
+                    "type": "Special",
+                    "name": "spc",
                     "id": 1,
+                    "options": {}
+                },
+                {
+                    "rule": "optional",
+                    "type": "uint32",
+                    "name": "dic",
+                    "id": 2,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "Object",
                     "name": "obj",
-                    "id": 2,
+                    "id": 3,
                     "options": {}
                 },
                 {
-                    "rule": "optional",
-                    "type": "Array",
+                    "rule": "repeated",
+                    "type": "Value",
                     "name": "arr",
-                    "id": 3,
+                    "id": 4,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "string",
                     "name": "str",
-                    "id": 4,
+                    "id": 5,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "int32",
                     "name": "itg",
-                    "id": 5,
+                    "id": 6,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "float",
                     "name": "flt",
-                    "id": 6,
+                    "id": 7,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "double",
                     "name": "dbl",
-                    "id": 7,
-                    "options": {}
-                },
-                {
-                    "rule": "optional",
-                    "type": "bool",
-                    "name": "bln",
                     "id": 8,
                     "options": {}
                 },
                 {
                     "rule": "optional",
                     "type": "bytes",
-                    "name": "byt",
+                    "name": "bin",
                     "id": 9,
                     "options": {}
                 }
@@ -102,7 +102,7 @@
                 {
                     "rule": "repeated",
                     "type": "uint32",
-                    "name": "ref",
+                    "name": "dic",
                     "id": 1,
                     "options": {
                         "packed": "true"
@@ -130,26 +130,44 @@
             "enums": [],
             "messages": [],
             "options": {}
-        },
+        }
+    ],
+    "enums": [
         {
-            "name": "Array",
-            "fields": [
+            "name": "Special",
+            "values": [
                 {
-                    "rule": "repeated",
-                    "type": "Value",
-                    "name": "val",
-                    "id": 1,
-                    "options": {
-                        "packed": "true"
-                    }
+                    "name": "TRUE",
+                    "id": 1
+                },
+                {
+                    "name": "FALSE",
+                    "id": 2
+                },
+                {
+                    "name": "EOBJ",
+                    "id": 3
+                },
+                {
+                    "name": "EARR",
+                    "id": 4
+                },
+                {
+                    "name": "ESTR",
+                    "id": 5
+                },
+                {
+                    "name": "EBIN",
+                    "id": 9
+                },
+                {
+                    "name": "UDEF",
+                    "id": 10
                 }
             ],
-            "enums": [],
-            "messages": [],
             "options": {}
         }
     ],
-    "enums": [],
     "imports": [],
     "options": {}
 }

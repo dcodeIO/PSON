@@ -1,4 +1,4 @@
-var PSON = require("../PSON.min.js"),
+var PSON = require("../PSON.js"),
     assert = require("assert");
 
 var pson = new PSON();
@@ -12,13 +12,13 @@ var data = {
     "obj": {
         "what": "that"
     },
-    "arr": [1,2,3]
+    "arr": [1,2,3/*,undefined*/]
 };
 var bb;
 
 var json = JSON.stringify(data);
 console.log("JSON: "+json+" ("+json.length+")\n");
-assert.deepEqual(JSON.parse(json), data);
+assert.deepEqual(JSON.parse(json), data); // will throw if undefined is used as JSON cannot handle this (PSON can)
 
 PSON.freeze(data);
 bb = pson.encode(data).compact();
@@ -36,7 +36,12 @@ var nAgain = bb.length;
 console.log("AGAIN USING DICT:"); bb.printDebug();
 
 var decData = pson.decode(bb);
-assert.deepEqual(data, decData);
+try {
+    assert.deepEqual(data, decData);
+} catch (e) {
+    console.log(data, decData);
+    throw(e);
+}
 
 // console.log("Dec", pson.decoder.dict);
 // console.log("Enc", pson.encoder.dict);
