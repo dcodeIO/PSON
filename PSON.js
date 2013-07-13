@@ -22,554 +22,469 @@
 (function(global) {
     "use strict";
     
-    function loadPSON(ProtoBuf) {
-        if (!ProtoBuf) {
-            throw(new Error("PSON requires ProtoBuf.js: Get it at https://github.com/dcodeIO/ProtoBuf.js"));
+    function loadPSON(ByteBuffer) {
+        if (!ByteBuffer) {
+            throw(new Error("PSON requires ByteBuffer.js: Get it at https://github.com/dcodeIO/ByteBuffer.js"));
         }
-        var ByteBuffer = ProtoBuf.ByteBuffer;
-        var Long = ProtoBuf.Long;
 
         /**
-         * Constructs a new combined PSON encoder and decoder.
-         * @param {Array.<string>=} values Initial dictionary values
-         * @param {boolean=} freezeEncoder Whether to freeze the encoder's dictionary, defaults to `false`
-         * @constructor
+         * PSON namespace.
+         * @namespace
+         * @exports PSON
          */
-        var PSON = function(values, freezeEncoder) {
-    
-            /**
-             * PSON encoder.
-             * @type {PSON.Encoder}
-             */
-            this.encoder = new PSON.Encoder(values);
-            if (!!freezeEncoder) this.encoder.freeze();
-    
-            /**
-             * PSON decoder.
-             * @type {PSON.Decoder}
-             */
-            this.decoder = new PSON.Decoder(values);
-        };
+        var PSON = {};
 
         /**
-         * Freezes an object, preventing its keys from being added to the dictionary when encoded.
-         * @param {Object} obj
+         * @alias PSON.T
          */
-        PSON.freeze = function(obj) {
-            if (typeof obj === 'object') {
-                Object.defineProperty(obj, "_PSON_FROZEN_", {
-                    value: true,
-                    enumerable: false,
-                    configurable: true
-                });
-            }
-        };
-
-        /**
-         * Unfreezes an object, allowing its keys being added to the dictionary again when encoded.
-         * @param {Object} obj
-         */
-        PSON.unfreeze = function(obj) {
-            if (typeof obj === 'object') {
-                delete obj["_PSON_FROZEN_"];
-            }
-        };
-    
-        var proto = ProtoBuf.newBuilder()["import"](
-            {
-                "package": "PSON",
-                "messages": [
-                    {
-                        "name": "Message",
-                        "fields": [
-                            {
-                                "rule": "repeated",
-                                "type": "string",
-                                "name": "dict",
-                                "id": 1,
-                                "options": {
-                                    "packed": "true"
-                                }
-                            },
-                            {
-                                "rule": "required",
-                                "type": "Value",
-                                "name": "data",
-                                "id": 2,
-                                "options": {}
-                            }
-                        ],
-                        "enums": [],
-                        "messages": [],
-                        "options": {}
-                    },
-                    {
-                        "name": "Value",
-                        "fields": [
-                            {
-                                "rule": "optional",
-                                "type": "Special",
-                                "name": "spc",
-                                "id": 1,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
-                                "type": "uint32",
-                                "name": "dic",
-                                "id": 2,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
-                                "type": "Object",
-                                "name": "obj",
-                                "id": 3,
-                                "options": {}
-                            },
-                            {
-                                "rule": "repeated",
-                                "type": "Value",
-                                "name": "arr",
-                                "id": 4,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
-                                "type": "string",
-                                "name": "str",
-                                "id": 5,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
-                                "type": "int32",
-                                "name": "itg",
-                                "id": 6,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
-                                "type": "float",
-                                "name": "flt",
-                                "id": 7,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
-                                "type": "double",
-                                "name": "dbl",
-                                "id": 8,
-                                "options": {}
-                            },
-                            {
-                                "rule": "optional",
-                                "type": "bytes",
-                                "name": "bin",
-                                "id": 9,
-                                "options": {}
-                            }
-                        ],
-                        "enums": [],
-                        "messages": [],
-                        "options": {}
-                    },
-                    {
-                        "name": "Object",
-                        "fields": [
-                            {
-                                "rule": "repeated",
-                                "type": "uint32",
-                                "name": "dic",
-                                "id": 1,
-                                "options": {
-                                    "packed": "true"
-                                }
-                            },
-                            {
-                                "rule": "repeated",
-                                "type": "string",
-                                "name": "key",
-                                "id": 2,
-                                "options": {
-                                    "packed": "true"
-                                }
-                            },
-                            {
-                                "rule": "repeated",
-                                "type": "Value",
-                                "name": "val",
-                                "id": 3,
-                                "options": {
-                                    "packed": "true"
-                                }
-                            }
-                        ],
-                        "enums": [],
-                        "messages": [],
-                        "options": {}
-                    }
-                ],
-                "enums": [
-                    {
-                        "name": "Special",
-                        "values": [
-                            {
-                                "name": "TRUE",
-                                "id": 1
-                            },
-                            {
-                                "name": "FALSE",
-                                "id": 2
-                            },
-                            {
-                                "name": "EOBJ",
-                                "id": 3
-                            },
-                            {
-                                "name": "EARR",
-                                "id": 4
-                            },
-                            {
-                                "name": "ESTR",
-                                "id": 5
-                            },
-                            {
-                                "name": "EBIN",
-                                "id": 9
-                            },
-                            {
-                                "name": "UDEF",
-                                "id": 10
-                            }
-                        ],
-                        "options": {}
-                    }
-                ],
-                "imports": [],
-                "options": {}
-            }
-                    ).build("PSON");
-    
-        /**
-         * PSON message class.
-         * @type {Function}
-         */
-        PSON.Message = proto.Message;
-
-        /**
-         * PSON special types.
-         * @type {Object.<string,number>}
-         */
-        PSON.Special = proto.Special;
+        PSON.T = (function() {
         
-        /**
-         * PSON value class.
-         * @type {Function}
-         */
-        PSON.Value = proto.Value;
-    
-        /**
-         * PSON object class.
-         * @type {Function}
-         */
-        PSON.Object = proto.Object;
-    
-        /**
-         * Constructs a new PSON Encoder.
-         * @param {Array.<string>=} values Initial dictionary values
-         * @constructor
-         */
-        var Encoder = function(values) {
-            values = (values && Array.isArray(values)) ? values : [];
+            /**
+             * PSON byte types.
+             * @exports PSON.T
+             * @namespace
+             */
+            var T = {};
             
-            /**
-             * Dictionary hash.
-             * @type {Object.<string,number>}
-             */
-            this.dict = {};
-        
-            /**
-             * Next dictionary index.
-             * @type {number}
-             */
-            this.next = 0;
-            while (this.next < values.length) {
-                this.dict[values[this.next]] = this.next++;
-            }
-        
-            /**
-             * Dictionary processing stack.
-             * @type {Array.<string>}
-             */
-            this.stack = [];
-        
-            /**
-             * Whether the whole dictionary has been frozen.
-             * @type {boolean}
-             */
-            this.frozen = false;
-        };
-        
+            T.ZERO       = 0x00; // 0
+            //             0x01; // 1
+            //             0x02; // -1
+            //             ...   // zig-zag encoded varint
+            T.MAX        = 0xEF; // max. zig-tag encoded varint
+            
+            T.NULL       = 0xF0; // null
+            T.TRUE       = 0xF1; // true
+            T.FALSE      = 0xF2; // false
+            T.EOBJECT    = 0xF3; // {}
+            T.EARRAY     = 0xF4; // []
+            T.ESTRING    = 0xF5; // ""
+            T.OBJECT     = 0xF6; // {...}
+            T.ARRAY      = 0xF7; // [...]
+            T.INTEGER    = 0xF8; // number (zig-zag encoded varint32)
+            T.LONG       = 0xF9; // Long   (zig-zag encoded varint64)
+            T.FLOAT      = 0xFA; // number (float32)
+            T.DOUBLE     = 0xFB; // number (float64)
+            T.STRING     = 0xFC; // string (varint length + data)
+            T.STRING_ADD = 0xFD; // string (varint length + data + add to dictionary)
+            T.STRING_GET = 0xFE; // string (varint index to get from dictionary)
+            T.BINARY     = 0xFF; // ArrayBuffer (varint length + bytes)
+            
+            return T;
+            
+        })();
+                
         /**
-         * Freezes the encoding dictionary, preventing any keys to be added to it.
+         * @alias PSON.Encoder
          */
-        Encoder.prototype.freeze = function() {
-            this.frozen = true;
-        };
+        PSON.Encoder = (function(ByteBuffer, T) {
         
-        /**
-         * Unfreezes the encoding dictionary, allowing keys to be added to it again.
-         */
-        Encoder.prototype.unfreeze = function() {
-            this.frozen = false;
-        };
+            /**
+             * Constructs a new PSON Encoder.
+             * @exports PSON.Encoder
+             * @class A PSON Encoder.
+             * @param {Array.<string>=} dict Initial dictionary
+             * @param {boolean} progressive Whether this is a progressive or a static encoder
+             * @constructor
+             */
+            var Encoder = function(dict, progressive) {
         
-        /**
-         * Encodes JSON to PSON.
-         * @param {*} data JSON
-         * @returns {ByteBuffer} PSON
-         */
-        Encoder.prototype.encode = function(data) {
-            var value = this._encodeValue(data, this.frozen);
-            var msg = new PSON.Message();
-            msg.dict = this.stack; this.stack = [];
-            msg.data = value;
-            return msg.encode();
-        };
+                /**
+                 * Dictionary hash.
+                 * @type {Object.<string,number>}
+                 */
+                this.dict = {};
         
-        /**
-         * Encodes a single JSON value to PSON. If the data cannot be encoded, a NULL-value is returned.
-         * @param {*} data JSON
-         * @param {boolean=} frozen Whether a parent object is already frozen
-         * @returns {PSON.Value} PSON value
-         * @private
-         */
-        Encoder.prototype._encodeValue = function(data, frozen) {
-            var value = new PSON.Value(), i;
-            if (data !== null) {
-                switch (typeof data) {
-                    case 'function':
-                        data = data.toString();
-                    case 'string':
-                        if (data === "") {
-                            value.spc = PSON.Special.ESTR;
-                        } else if (this.dict.hasOwnProperty(data)) {
-                            value.ref = this.dict[data];
-                        } else {
-                            value.str = data;
-                        }
-                        break;
-                    case 'number':
-                        var maybeInt = parseInt(data, 10);
-                        if (data === maybeInt) {
-                            value.itg = maybeInt;
-                        } else {
-                            // TODO: float if possible without precision loss
-                            value.dbl = data;
-                        }
-                        break;
-                    case 'object':
-                        frozen = frozen || !!data["_PSON_FROZEN_"];
-                        if (Array.isArray(data)) {
-                            if (data.length == 0) {
-                                value.spc = PSON.Special.EARR;
+                /**
+                 * Next dictionary index.
+                 * @type {number}
+                 */
+                this.next = 0;
+                if (dict && Array.isArray(dict)) {
+                    while (this.next < dict.length) {
+                        this.dict[dict[this.next]] = this.next++;
+                    }
+                }
+        
+                /**
+                 * Whether the encoder is progressive or static.
+                 * @type {boolean}
+                 */
+                this.progressive = !!progressive;
+            };
+        
+            /**
+             * Encodes JSON to PSON.
+             * @param {*} json JSON
+             * @param {(!ByteBuffer)=} buf Buffer to encode to
+             * @returns {!ByteBuffer} PSON
+             */
+            Encoder.prototype.encode = function(json, buf) {
+                if (!buf) {
+                    buf = new ByteBuffer();
+                }
+                var le = buf.littleEndian;
+                try {
+                    this._encodeValue(json, buf.LE());
+                    buf.littleEndian = le;
+                    return buf;
+                } catch (e) {
+                    buf.littleEndian = le;
+                    throw(e);
+                }
+            };
+        
+            /**
+             * Encodes a single JSON value to PSON.
+             * @param {*} val JSON value
+             * @param {!ByteBuffer} buf Target buffer
+             * @private
+             */
+            Encoder.prototype._encodeValue = function(val, buf) {
+                if (val === null) {
+                    buf.writeUint8(T.NULL);
+                } else {
+                    switch (typeof val) {
+                        case 'function':
+                            val = val.toString();
+                            // fall through
+                        case 'string':
+                            if (val.length == 0) {
+                                buf.writeUint8(T.ESTRING);
                             } else {
-                                value.arr = [];
-                                for (i=0; i<data.length; i++) {
-                                    value.arr.push(this._encodeValue(data[i], frozen));
+                                if (this.dict.hasOwnProperty(val)) {
+                                    buf.writeUint8(T.STRING_GET);
+                                    buf.writeVarint32(this.dict[val]);
+                                } else {
+                                    buf.writeUint8(T.STRING);
+                                    buf.writeVString(val);
                                 }
                             }
-                        } else {
-                            try {
-                                var bin = ByteBuffer.wrap(data);
-                                if (bin.length == 0) {
-                                    value.spc = PSON.Special.EBIN;
+                            break;
+                        case 'number':
+                            var intVal = parseInt(val);
+                            if (val === intVal) {
+                                var zzval = ByteBuffer.zigZagEncode32(val); // unsigned
+                                if (zzval <= T.MAX) {
+                                    buf.writeUint8(zzval);
                                 } else {
-                                    value.bin = bin;
-                                }                        
-                            } catch (notBin) {
-                                var keys = Object.keys(data), key;
-                                if (keys.length == 0) {
-                                    value.spc = PSON.Special.EOBJ;
+                                    buf.writeUint8(T.INTEGER);
+                                    buf.writeZigZagVarint32(val);
+                                }
+                            } else {
+                                // TODO: float
+                                buf.writeUint8(T.DOUBLE);
+                                buf.writeFloat64(val);
+                            }
+                            break;
+                        case 'boolean':
+                            buf.writeUint8(val ? T.TRUE : T.FALSE);
+                            break;
+                        case 'object':
+                            if (Array.isArray(val)) {
+                                if (val.length == 0) {
+                                    buf.writeUint8(T.EARRAY);
                                 } else {
-                                    value.obj = new PSON.Object();
-                                    for (i=0; i<keys.length; i++) {
-                                        key = keys[i];
-                                        if (typeof data[key] !== 'undefined') { // Undefined is skipped
-                                            if (frozen) { // Skip dictionary if frozen
-                                                value.obj.key.push(key);
+                                    buf.writeUint8(T.ARRAY);
+                                    buf.writeVarint32(val.length);
+                                    for (var i=0; i<val.length; i++) {
+                                        this._encodeValue(val[i], buf);
+                                    }
+                                }
+                            } else {
+                                try {
+                                    val = ByteBuffer.wrap(val);
+                                    buf.writeUint8(T.BINARY);
+                                    buf.writeVarint32(val.length);
+                                    buf.append(val);
+                                } catch (e) {
+                                    var keys = Object.keys(val);
+                                    if (keys.length == 0) {
+                                        buf.writeUint8(T.EOBJECT);
+                                    } else {
+                                        buf.writeUint8(T.OBJECT);
+                                        buf.writeVarint32(keys.length);
+                                        for (var i=0; i<keys.length; i++) {
+                                            var key = keys[i];
+                                            if (this.dict.hasOwnProperty(key)) {
+                                                buf.writeUint8(T.STRING_GET);
+                                                buf.writeVarint32(this.dict[key]);
                                             } else {
-                                                if (!this.dict.hasOwnProperty(key)) {
-                                                    this.dict[key] = this.next;
-                                                    this.stack.push(key);
-                                                    value.obj.dic.push(this.next++);
+                                                if (this.progressive) {
+                                                    // Add to dictionary
+                                                    this.dict[key] = this.next++;
+                                                    buf.writeUint8(T.STRING_ADD);
+                                                    buf.writeVString(key);
                                                 } else {
-                                                    value.obj.dic.push(this.dict[key]);
+                                                    // Plain string
+                                                    buf.writeUint8(T.STRING);
+                                                    buf.writeVString(key);
                                                 }
                                             }
-                                            value.obj.val.push(this._encodeValue(data[key], frozen));
+                                            this._encodeValue(val[key], buf);
                                         }
                                     }
                                 }
                             }
-                        }
-                        break;
-                    case 'boolean':
-                        value.spc = data ? PSON.Special.TRUE : PSON.Special.FALSE;
-                        break;
-                    case 'undefined':
-                        value.spc = PSON.Special.UDEF;
-                        break;
+                            break;
+                        case 'undefined':
+                            buf.writeUint8(T.UNDEFINED);
+                            break;
+                    }
                 }
-            } // else null
-            return value;
-        };
-        
-        /** @alias {Encoder} */
-        PSON.Encoder = Encoder;
+            };
+            
+            return Encoder;
+            
+        })(ByteBuffer, PSON.T);
                 
         /**
-         * Constructs a new PSON Decoder.
-         * @param {Array.<string>} values Initial dictionary values
-         * @constructor
+         * @alias PSON.Decoder
          */
-        var Decoder = function(values) {
+        PSON.Decoder = (function(ByteBuffer, T) {
         
             /**
-             * Dictionary array.
-             * @type {Array.<string>}
+             * Constructs a new PSON Decoder.
+             * @exports PSON.Decoder
+             * @class A PSON Decoder.
+             * @param {Array.<string>} dict Initial dictionary values
+             * @constructor
              */
-            this.dict = (values && Array.isArray(values)) ? values : []; 
-        };
+            var Decoder = function(dict, progressive) {
         
-        /**
-         * Decodes PSON to JSON.
-         * @param {ByteBuffer} buffer PSON
-         * @returns {*} JSON
-         */
-        Decoder.prototype.decode = function(buffer) {
-            var msg = PSON.Message.decode(buffer);
-            for (var i=0; i<msg.dict.length; i++) {
-                this.dict.push(msg.dict[i]);
-            }
-            return this._decodeValue(msg.data);
-        };
+                /**
+                 * Dictionary array.
+                 * @type {Array.<string>}
+                 */
+                this.dict = (dict && Array.isArray(dict)) ? dict : [];
         
-        /**
-         * Decodes a single PSON value to JSON.
-         * @param {PSON.Value} PSON value
-         * @returns {*} JSON
-         * @private
-         */
-        Decoder.prototype._decodeValue = function(value) {
-            if (value.spc) {
-                switch (value.spc) {
-                    case PSON.Special.TRUE:
-                        return true;
-                    case PSON.Special.FALSE:
-                        return false;
-                    case PSON.Special.EOBJ:
-                        return {};
-                    case PSON.Special.EARR:
-                        return [];
-                    case PSON.Special.ESTR:
-                        return "";
-                    case PSON.Special.EBIN:
-                        return new ByteBuffer(0);
-                    case PSON.Special.UDEF:
-                        return undefined;
+                /**
+                 * Whether this is a progressive or a static decoder.
+                 * @type {boolean}
+                 */
+                this.progressive = !!progressive;
+            };
+        
+            /**
+             * Decodes PSON to JSON.
+             * @param {!(ByteBuffer|ArrayBuffer|Buffer)} buf PSON
+             * @returns {?} JSON
+             */
+            Decoder.prototype.decode = function(buf) {
+                if (!(buf instanceof ByteBuffer)) {
+                    buf = ByteBuffer.wrap(buf);
                 }
-            } else if (value.dic !== null) {
-                return this.dict[value.dic]
-            } else if (value.obj !== null) {
-                var obj = {}, i;
-                if (value.obj.dic.length > 0) {
-                    for (i=0; i<value.obj.dic.length; i++) {
-                        var dic = value.obj.dic[i];
-                        var key = this.dict[dic];
-                        obj[key] = this._decodeValue(value.obj.val[i]);
-                    }
+                var le = buf.littleEndian;
+                try {
+                    var val = this._decodeValue(buf.LE());
+                    buf.littleEndian = le;
+                    return val;
+                } catch (e) {
+                    buf.littleEndian = le;
+                    throw(e);
+                }
+            };
+        
+            /**
+             * Decodes a single PSON value to JSON.
+             * @param {!ByteBuffer} buf Buffer to decode from
+             * @returns {?} JSON
+             * @private
+             */
+            Decoder.prototype._decodeValue = function(buf) {
+                var t = buf.readUint8();
+                if (t <= T.MAX) {
+                    return ByteBuffer.zigZagDecode32(t);
                 } else {
-                    for (i=0; i<value.obj.key.length; i++) {
-                        obj[value.obj.key[i]] = this._decodeValue(value.obj.val[i]);
+                    switch (t) {
+                        case T.NULL: return null;
+                        case T.TRUE: return true;
+                        case T.FALSE: return false;
+                        case T.EOBJECT: return {};
+                        case T.EARRAY: return [];
+                        case T.ESTRING: return "";
+                        case T.OBJECT:
+                            t = buf.readVarint32(); // #keys
+                            var obj = {};
+                            while (--t>=0) {
+                                obj[this._decodeValue(buf)] = this._decodeValue(buf);
+                            }
+                            return obj;
+                        case T.ARRAY:
+                            t = buf.readVarint32(); // #items
+                            var arr = [];
+                            while (--t>=0) {
+                                arr.push(this._decodeValue(buf));
+                            }
+                            return arr;
+                        case T.INTEGER: return buf.readZigZagVarint32();
+                        case T.LONG: return buf.readZigZagVarint64();
+                        case T.FLOAT: return buf.readFloat32();
+                        case T.DOUBLE: return buf.readFloat64();
+                        case T.STRING: return buf.readVString();
+                        case T.STRING_ADD:
+                            var str = buf.readVString();
+                            this.dict.push(str);
+                            return str;
+                        case T.STRING_GET:
+                            return this.dict[buf.readVarint32()];
+                        case T.BINARY:
+                            t = buf.readVarint32();
+                            return buf.slice(buf.offset, buf.offset+t);
+                        default:
+                            throw(new Error("Illegal type at "+buf.offset+": "+t));
                     }
                 }
-                return obj;
-            } else if (value.arr.length > 0) {
-                var arr = [];
-                for (var j=0; j<value.arr.length; j++) {
-                    arr.push(this._decodeValue(value.arr[j]));
-                }
-                return arr;
-            } else if (value.str !== null) {
-                return value.str;
-            } else if (value.itg !== null) {
-                return value.itg;
-            } else if (value.flt !== null) {
-                return value.flt;
-            } else if (value.dbl !== null) {
-                return value.dbl;
-            } else if (value.bin !== null) {
-                return value.bin; // ByteBuffer
-            } else {
-                return null;
-            }
-        };
-        
-        /** @alias {Decoder} */
-        PSON.Decoder = Decoder;
+            };
             
+            return Decoder;
+            
+        })(ByteBuffer, PSON.T);
+                
         /**
-         * Encodes JSON to PSON using this instance's encoder.
-         * @param {*} json JSON
-         * @returns {ByteBuffer} PSON
+         * @alias PSON.Pair
          */
-        PSON.prototype.encode = function(json) {
-            return this.encoder.encode(json);
-        };
-
-        /**
-         * Encodes JSON to PSON using this instance's encoder.
-         * @param {*} json JSON
-         * @returns {Buffer} PSON
-         * @throws {Error} If not running on node.js
-         */
-        PSON.prototype.toBuffer = function(json) {
-            return this.encode(json).toBuffer();
-        };
-
-        /**
-         * Encodes JSON to PSON using this instance's encoder.
-         * @param {*} json JSON
-         * @returns {ArrayBuffer} PSON
-         */
-        PSON.prototype.toArrayBuffer = function(json) {
-            return this.encode(json).toArraybuffer();
-        };
-    
-        /**
-         * Decodes PSON to JSON using this instance's decoder.
-         * @param {ByteBuffer|Buffer|ArrayBuffer} pson PSON
-         * @returns {*} JSON
-         */
-        PSON.prototype.decode = function(pson) {
-            return this.decoder.decode(pson);
-        };
+        PSON.Pair = (function() {
         
+            /**
+             * Constructs a new abstract PSON encoder and decoder pair.
+             * @exports PSON.Pair
+             * @class An abstract PSON encoder and decoder pair.
+             * @constructor
+             * @abstract
+             */
+            var Pair = function() {
+        
+                /**
+                 * PSON Encoder.
+                 * @type {!PSON.Encoder}
+                 * @expose
+                 */
+                this.encoder;
+        
+                /**
+                 * PSON Decoder.
+                 * @type {!PSON.Decoder}
+                 * @expose
+                 */
+                this.decoder;
+            };
+        
+            /**
+             * Encodes JSON to PSON.
+             * @param {*} json JSON
+             * @returns {!ByteBuffer} PSON
+             * @expose
+             */
+            Pair.prototype.encode = function(json) {
+                return this.encoder.encode(json);
+            };
+        
+            /**
+             * Encodes JSON straight to an ArrayBuffer of PSON.
+             * @param {*} json JSON
+             * @returns {!ArrayBuffer} PSON as ArrayBuffer
+             * @expose
+             */
+            Pair.prototype.toArrayBuffer = function(json) {
+                return this.encoder.encode(json).toArrayBuffer();
+            };
+        
+            /**
+             * Encodes JSON straight to a node Buffer of PSON.
+             * @param {*} json JSON
+             * @returns {!Buffer} PSON as node Buffer
+             * @expose
+             */
+            Pair.prototype.toBuffer = function(json) {
+                return this.encoder.encode(json).toBuffer();
+            };
+        
+            /**
+             * Decodes PSON to JSON.
+             * @param {ByteBuffer|ArrayBuffer|Buffer} pson PSON
+             * @returns {*} JSON
+             * @expose
+             */
+            Pair.prototype.decode = function(pson) {
+                return this.decoder.decode(pson);
+            };
+        
+            return Pair;
+        })();
+                
+        /**
+         * @alias PSON.StaticPair
+         */
+        PSON.StaticPair = (function(Pair, Encoder, Decoder) {
+        
+            /**
+             * Constructs a new static PSON encoder and decoder pair.
+             * @exports PSON.StaticPair
+             * @class A static PSON encoder and decoder pair.
+             * @param {Array.<string>=} dict Static dictionary
+             * @constructor
+             * @extends PSON.Pair
+             */
+            var StaticPair = function(dict) {
+                Pair.call(this);
+                
+                // Static encoder
+                this.encoder = new Encoder(dict, false);
+                
+                // Static decoder
+                this.decoder = new Decoder(dict, false);
+            };
+            
+            // Extends PSON.Pair
+            StaticPair.prototype = Object.create(Pair.prototype);
+            
+            return StaticPair;
+        
+        })(PSON.Pair, PSON.Encoder, PSON.Decoder);
+                
+        /**
+         * @alias PSON.ProgressivePair
+         */
+        PSON.ProgressivePair = (function(Pair, Encoder, Decoder) {
+        
+            /**
+             * Constructs a new progressive PSON encoder and decoder pair.
+             * @exports PSON.ProgressivePair
+             * @class A progressive PSON encoder and decoder pair.
+             * @param {Array.<string>=} dict Initial dictionary
+             * @constructor
+             * @extends PSON.Pair
+             */
+            var ProgressivePair = function(dict) {
+                Pair.call(this);
+                
+                // Progressive encoder
+                this.encoder = new Encoder(dict, true);
+                
+                // Progressive decoder
+                this.decoder = new Decoder(dict, true);
+            };
+            
+            // Extends PSON.Pair
+            ProgressivePair.prototype = Object.create(Pair.prototype);
+            
+            return ProgressivePair;
+            
+        })(PSON.Pair, PSON.Encoder, PSON.Decoder);
+                
         return PSON;
     }
 
     // Enable module loading if available
     if (typeof module != 'undefined' && module["exports"]) { // CommonJS
-        module["exports"] = loadPSON(require("protobufjs"));
+        module["exports"] = loadPSON(require("bytebuffer"));
     } else if (typeof define != 'undefined' && define["amd"]) { // AMD
-        define("PSON", ["ProtoBuf"], loadPSON);
+        define("PSON", ["ByteBuffer"], loadPSON);
     } else {
         if (!global["dcodeIO"]) {
             global["dcodeIO"] = {};
         }
-        global["dcodeIO"]["PSON"] = loadPSON(global["dcodeIO"]["ProtoBuf"]);
+        global["dcodeIO"]["PSON"] = loadPSON(global["dcodeIO"]["ByteBuffer"]);
     }
 
 })(this);

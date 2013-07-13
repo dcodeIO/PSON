@@ -1,7 +1,7 @@
 {
     "name": "pson",
-    "description": "A binary serialization format built on the simplicity of JSON and the encoding capabilities of ProtoBuf.",
-    "version": "0.3.0",
+    "description": "A super efficient binary serialization format for JSON.",
+    "version": "0.5.0",
     "author": "Daniel Wirtz <dcode@dcode.io>",
     "main": "PSON.js",
     "repository": {
@@ -11,23 +11,25 @@
     "bugs": {
         "url": "https://github.com/dcodeIO/PSON/issues"
     },
-    "keywords": ["net", "buffer", "protobuf", "serialization", "bytebuffer", "websocket", "webrtc", "json"],
+    "keywords": ["net", "buffer", "serialization", "bytebuffer", "websocket", "webrtc", "json", "protobuf", "thrift"],
     "license": "Apache-2.0",
     "engines": {
         "node": ">=0.6"
     },
     "dependencies": {
-        "protobufjs": "latest"
+        "bytebuffer": "latest"
     },
     "devDependencies": {
         "preprocessor": "latest",
-        "closurecompiler": "latest"
+        "closurecompiler": "latest",
+        "testjs": "latest"
     },
     "scripts": {
-        "proto": "proto2js src/PSON.proto > src/PSON.json",
+        "test": "testjs",
+
         "build": "preprocess src/PSON.js src/ > PSON.js",
         "compile": "ccjs PSON.js > PSON.min.js",
-        "test": "node tests/test.js",
-        "make": "npm run-script proto && npm run-script build && npm run-script compile && npm test"
+        "jsdoc": "jsdoc -c jsdoc.json",
+        "make": "npm run-script build && npm run-script compile && npm test && npm run-script jsdoc"
     }
 }

@@ -1,153 +1,180 @@
-/**
- * Constructs a new PSON Encoder.
- * @param {Array.<string>=} values Initial dictionary values
- * @constructor
+// #ifdef UNDEFINED
+/*
+ Copyright 2013 Daniel Wirtz <dcode@dcode.io>
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
  */
-var Encoder = function(values) {
-    values = (values && Array.isArray(values)) ? values : [];
-    
-    /**
-     * Dictionary hash.
-     * @type {Object.<string,number>}
-     */
-    this.dict = {};
-
-    /**
-     * Next dictionary index.
-     * @type {number}
-     */
-    this.next = 0;
-    while (this.next < values.length) {
-        this.dict[values[this.next]] = this.next++;
-    }
-
-    /**
-     * Dictionary processing stack.
-     * @type {Array.<string>}
-     */
-    this.stack = [];
+// #endif
+/**
+ * @alias PSON.Encoder
+ */
+PSON.Encoder = (function(ByteBuffer, T) {
 
     /**
-     * Whether the whole dictionary has been frozen.
-     * @type {boolean}
+     * Constructs a new PSON Encoder.
+     * @exports PSON.Encoder
+     * @class A PSON Encoder.
+     * @param {Array.<string>=} dict Initial dictionary
+     * @param {boolean} progressive Whether this is a progressive or a static encoder
+     * @constructor
      */
-    this.frozen = false;
-};
+    var Encoder = function(dict, progressive) {
 
-/**
- * Freezes the encoding dictionary, preventing any keys to be added to it.
- */
-Encoder.prototype.freeze = function() {
-    this.frozen = true;
-};
+        /**
+         * Dictionary hash.
+         * @type {Object.<string,number>}
+         */
+        this.dict = {};
 
-/**
- * Unfreezes the encoding dictionary, allowing keys to be added to it again.
- */
-Encoder.prototype.unfreeze = function() {
-    this.frozen = false;
-};
+        /**
+         * Next dictionary index.
+         * @type {number}
+         */
+        this.next = 0;
+        if (dict && Array.isArray(dict)) {
+            while (this.next < dict.length) {
+                this.dict[dict[this.next]] = this.next++;
+            }
+        }
 
-/**
- * Encodes JSON to PSON.
- * @param {*} data JSON
- * @returns {ByteBuffer} PSON
- */
-Encoder.prototype.encode = function(data) {
-    var value = this._encodeValue(data, this.frozen);
-    var msg = new PSON.Message();
-    msg.dict = this.stack; this.stack = [];
-    msg.data = value;
-    return msg.encode();
-};
+        /**
+         * Whether the encoder is progressive or static.
+         * @type {boolean}
+         */
+        this.progressive = !!progressive;
+    };
 
-/**
- * Encodes a single JSON value to PSON. If the data cannot be encoded, a NULL-value is returned.
- * @param {*} data JSON
- * @param {boolean=} frozen Whether a parent object is already frozen
- * @returns {PSON.Value} PSON value
- * @private
- */
-Encoder.prototype._encodeValue = function(data, frozen) {
-    var value = new PSON.Value(), i;
-    if (data !== null) {
-        switch (typeof data) {
-            case 'function':
-                data = data.toString();
-            case 'string':
-                if (data === "") {
-                    value.spc = PSON.Special.ESTR;
-                } else if (this.dict.hasOwnProperty(data)) {
-                    value.ref = this.dict[data];
-                } else {
-                    value.str = data;
-                }
-                break;
-            case 'number':
-                var maybeInt = parseInt(data, 10);
-                if (data === maybeInt) {
-                    value.itg = maybeInt;
-                } else {
-                    // TODO: float if possible without precision loss
-                    value.dbl = data;
-                }
-                break;
-            case 'object':
-                frozen = frozen || !!data["_PSON_FROZEN_"];
-                if (Array.isArray(data)) {
-                    if (data.length == 0) {
-                        value.spc = PSON.Special.EARR;
+    /**
+     * Encodes JSON to PSON.
+     * @param {*} json JSON
+     * @param {(!ByteBuffer)=} buf Buffer to encode to
+     * @returns {!ByteBuffer} PSON
+     */
+    Encoder.prototype.encode = function(json, buf) {
+        if (!buf) {
+            buf = new ByteBuffer();
+        }
+        var le = buf.littleEndian;
+        try {
+            this._encodeValue(json, buf.LE());
+            buf.littleEndian = le;
+            return buf;
+        } catch (e) {
+            buf.littleEndian = le;
+            throw(e);
+        }
+    };
+
+    /**
+     * Encodes a single JSON value to PSON.
+     * @param {*} val JSON value
+     * @param {!ByteBuffer} buf Target buffer
+     * @private
+     */
+    Encoder.prototype._encodeValue = function(val, buf) {
+        if (val === null) {
+            buf.writeUint8(T.NULL);
+        } else {
+            switch (typeof val) {
+                case 'function':
+                    val = val.toString();
+                    // fall through
+                case 'string':
+                    if (val.length == 0) {
+                        buf.writeUint8(T.ESTRING);
                     } else {
-                        value.arr = [];
-                        for (i=0; i<data.length; i++) {
-                            value.arr.push(this._encodeValue(data[i], frozen));
+                        if (this.dict.hasOwnProperty(val)) {
+                            buf.writeUint8(T.STRING_GET);
+                            buf.writeVarint32(this.dict[val]);
+                        } else {
+                            buf.writeUint8(T.STRING);
+                            buf.writeVString(val);
                         }
                     }
-                } else {
-                    try {
-                        var bin = ByteBuffer.wrap(data);
-                        if (bin.length == 0) {
-                            value.spc = PSON.Special.EBIN;
+                    break;
+                case 'number':
+                    var intVal = parseInt(val);
+                    if (val === intVal) {
+                        var zzval = ByteBuffer.zigZagEncode32(val); // unsigned
+                        if (zzval <= T.MAX) {
+                            buf.writeUint8(zzval);
                         } else {
-                            value.bin = bin;
-                        }                        
-                    } catch (notBin) {
-                        var keys = Object.keys(data), key;
-                        if (keys.length == 0) {
-                            value.spc = PSON.Special.EOBJ;
+                            buf.writeUint8(T.INTEGER);
+                            buf.writeZigZagVarint32(val);
+                        }
+                    } else {
+                        // TODO: float
+                        buf.writeUint8(T.DOUBLE);
+                        buf.writeFloat64(val);
+                    }
+                    break;
+                case 'boolean':
+                    buf.writeUint8(val ? T.TRUE : T.FALSE);
+                    break;
+                case 'object':
+                    if (Array.isArray(val)) {
+                        if (val.length == 0) {
+                            buf.writeUint8(T.EARRAY);
                         } else {
-                            value.obj = new PSON.Object();
-                            for (i=0; i<keys.length; i++) {
-                                key = keys[i];
-                                if (typeof data[key] !== 'undefined') { // Undefined is skipped
-                                    if (frozen) { // Skip dictionary if frozen
-                                        value.obj.key.push(key);
+                            buf.writeUint8(T.ARRAY);
+                            buf.writeVarint32(val.length);
+                            for (var i=0; i<val.length; i++) {
+                                this._encodeValue(val[i], buf);
+                            }
+                        }
+                    } else {
+                        try {
+                            val = ByteBuffer.wrap(val);
+                            buf.writeUint8(T.BINARY);
+                            buf.writeVarint32(val.length);
+                            buf.append(val);
+                        } catch (e) {
+                            var keys = Object.keys(val);
+                            if (keys.length == 0) {
+                                buf.writeUint8(T.EOBJECT);
+                            } else {
+                                buf.writeUint8(T.OBJECT);
+                                buf.writeVarint32(keys.length);
+                                for (var i=0; i<keys.length; i++) {
+                                    var key = keys[i];
+                                    if (this.dict.hasOwnProperty(key)) {
+                                        buf.writeUint8(T.STRING_GET);
+                                        buf.writeVarint32(this.dict[key]);
                                     } else {
-                                        if (!this.dict.hasOwnProperty(key)) {
-                                            this.dict[key] = this.next;
-                                            this.stack.push(key);
-                                            value.obj.dic.push(this.next++);
+                                        if (this.progressive) {
+                                            // Add to dictionary
+                                            this.dict[key] = this.next++;
+                                            buf.writeUint8(T.STRING_ADD);
+                                            buf.writeVString(key);
                                         } else {
-                                            value.obj.dic.push(this.dict[key]);
+                                            // Plain string
+                                            buf.writeUint8(T.STRING);
+                                            buf.writeVString(key);
                                         }
                                     }
-                                    value.obj.val.push(this._encodeValue(data[key], frozen));
+                                    this._encodeValue(val[key], buf);
                                 }
                             }
                         }
                     }
-                }
-                break;
-            case 'boolean':
-                value.spc = data ? PSON.Special.TRUE : PSON.Special.FALSE;
-                break;
-            case 'undefined':
-                value.spc = PSON.Special.UDEF;
-                break;
+                    break;
+                case 'undefined':
+                    buf.writeUint8(T.UNDEFINED);
+                    break;
+            }
         }
-    } // else null
-    return value;
-};
-
-/** @alias {Encoder} */
-PSON.Encoder = Encoder;
+    };
+    
+    return Encoder;
+    
+})(ByteBuffer, PSON.T);

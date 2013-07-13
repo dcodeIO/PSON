@@ -1,115 +1,29 @@
 ![PSON](https://raw.github.com/dcodeIO/PSON/master/PSON.png)
 ====
-You **love** JSON for its simplicity but **hate** it for its network overhead?  
-You **love** ProtoBuf for its small packet size but **hate** it for its complexity?
+**PSON** is a super efficient binary serialization format for JSON. It outperforms JSON, BSON, BJSON, Smile and, if used
+wisely, even protobuf and thrift in encoding size!
 
-*Can't there solely be love?*
+How does it work?
+-----------------
+PSON combines the best of BJSON, ProtoBuf and ZIP to achieve a superior small footprint on the network level. Basic
+constants like `null`, `true` and `false` and small integer values are efficiently encoded as a single byte while
+integer values are always stored as varints like known from protobuf. Additionally it comes with progressive and static
+dictionaries to reduce data redundancy to the absolute minimum. In a nutshell:
 
-Yes it can!
------------
-**PSON** is a binary serialization format built on the simplicity of JSON and the encoding capabilities of
-[Google's Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview). This repository contains
-a plain JavaScript implementation on top of [ProtoBuf.js](https://github.com/dcodeIO/ProtoBuf.js).
+* 256 one-byte values
+* Zig-zag encoded base 128 variable length integers from protobuf
+* Keyword dictionaries
 
-Usage
------
+A **PSON.StaticPair** contains the PSON encoder and decoder for a static (or empty) dictionary and can be shared between
+all connections. It's recommended for production.
 
-#### node.js/CommonJS
+A **PSON.ProgressivePair** contains the PSON encoder and decoder for a progressive (automatically filling) dictionary.
+On the one hand this requires no dictionary work from the developer but on the other is required on a per-connection
+basis.
 
-`npm install pson`
-
-```js
-var PSON = require("pson");
-var pson = new PSON();
-...
-```
-
-#### RequireJS/AMD
-
-```js
-require.config({
-    ...
-    "paths": {
-        "Long": "/path/to/Long.js",
-        "ByteBuffer": "/path/to/ByteBuffer.js",
-        "ProtoBuf": "/path/to/ProtoBuf.js",
-        "PSON": "/path/to/PSON.js"
-    },
-    ...
-});
-require(["PSON"], function(PSON) {
-    ...
-});
-```
-
-#### Browser
-
-```html
-<script src="//raw.github.com/dcodeIO/Long.js/master/Long.min.js"></script>
-<script src="//raw.github.com/dcodeIO/ByteBuffer.js/master/ByteBuffer.min.js"></script>
-<script src="//raw.github.com/dcodeIO/ProtoBuf.js/master/ProtoBuf.min.js"></script>
-<script src="//raw.github.com/dcodeIO/PSON/master/PSON.min.js"></script>
-```
-
-```js
-var PSON = dcodeIO.PSON;
-...
-```
-
-Example
--------
-```js
-// Sender
-var initialDictionary = [ ... ];
-var pson = new PSON(initialDictionary);
-var data = { "hello": "world!" };
-var buffer = pson.encode(data);
-someSocket.send(buffer);
-```
-
-```js
-// Receiver
-var initialDictionary = [ same! ];
-var pson = new PSON(initialDictionary);
-someSocket.on("data", function(data) {
-    data = pson.decode(data);
-    ...
-});
-```
-
-API
----
-The API is pretty much straight forward:
-
-#### PSON
-* `new PSON([initialDictionary: Array.<string>[, freezeEncoder: boolean]])` constructs a new combined encoder and decoder
-* `PSON#encode(json: *): ByteBuffer` encodes JSON to PSON data
-  * `PSON#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
-  * `PSON#toArrayBuffer(json: *): ArrayBuffer` encodes straight to an ArrayBuffer
-* `PSON#decode(pson: ByteBuffer|Buffer|ArrayBuffer): *` decodes PSON data to JSON
-* `PSON.freeze(obj: Object)` Freezes an object, preventing its keys and those of its children from being added to the
-  dictionary when encoded
-* `PSON.unfreeze(obj: Object)` Unfreezes an object, allowing its keys to be added to the dictionary again when encoded
-* `PSON#encoder: PSON.Encoder` Encoder instance
-* `PSON#decoder: PSON.Decoder` Decoder instance
-
-#### PSON.Encoder
-* `PSON.Encoder#freeze()`: Freezes the encoding dictionary, preventing any keys to be added (useful for static dicts)
-* `PSON.Encoder#unfreeze()`: Unfreezes the encoding dictionary, allowing keys to be added again
-
-Behind the love
----------------
-The idea behind PSON is to keep a common dictionary containing keys to integer mappings on both ends. This is similar to
-how ZIP archives work and trades some memory for a smaller packet size. The dictionary allows us to shorten any keywords
-to be represented by a single byte (in an optimal case). As a result the exact string representing a keyword needs to be
-transmitted only once, making each subsequent message considerably smaller - in theory. Additionally, ProtoBuf's varint
-encoding is great for submitting numeric values - in practice - and the `initialDictionary` parameter even allows to
-start off with arbitrary string values (for keys _and_ values). Therefore, an ideal use case for PSON is to use it as
-a drop-in replacement for an existing mostly static JSON protocol.
-
-Comparison
-----------
-As of today there is a minimalistic test case for the following data:
+tl;dr Numbers, please!
+----------------------
+The test suite contains the following basic example message:
 
 ```json
 {
@@ -126,24 +40,100 @@ As of today there is a minimalistic test case for the following data:
 }
 ```
 
-which is
+* **JSON** stringify: 133 bytes
+* **PSON** without a dictionary: 105 bytes (about **23% smaller** than JSON)
+* **PSON** with a progressive dictionary: 105 bytes for the first and 61 bytes for each subsequent message (about 
+  **23% smaller** for the first and about **55% smaller** for each subsequent message than JSON.
+* **PSON** with the same but static dictionary: 61 bytes for each message (about **55% smaller** than JSON)           
 
-* **133 bytes** large after `JSON.stringify`
-* **132 bytes** after the first `PSON#encode` including the dictionary and
-* **77 bytes** after each subsequent `PSON#encode`
+Usage
+-----
 
-which is, in this case, from the second message onwards about **42% smaller than JSON**, or
+#### node.js/CommonJS
 
-* **121 bytes** after each `PSON#encode` if the encoder or the data object has been frozen (dictionary disabled)
+`npm install pson`
+
+```js
+var PSON = require("pson");
+...
+```
+
+#### RequireJS/AMD
+
+```js
+require.config({
+    ...
+    "paths": {
+        "Long": "/path/to/Long.js",
+        "ByteBuffer": "/path/to/ByteBuffer.js",
+        "PSON": "/path/to/PSON.js"
+    },
+    ...
+});
+require(["PSON"], function(PSON) {
+    ...
+});
+```
+
+#### Browser
+
+```html
+<script src="//raw.github.com/dcodeIO/Long.js/master/Long.min.js"></script>
+<script src="//raw.github.com/dcodeIO/ByteBuffer.js/master/ByteBuffer.min.js"></script>
+<script src="//raw.github.com/dcodeIO/PSON/master/PSON.min.js"></script>
+```
+
+```js
+var PSON = dcodeIO.PSON;
+...
+```
+
+Example
+-------
+```js
+// Sender
+var pson = new PSON.ProgressivePair();
+var data = { "hello": "world!" };
+var buffer = pson.encode(data);
+someSocket.send(buffer);
+```
+
+```js
+// Receiver
+var initialDictionary = [ same! ];
+var pson = new PSON.ProgressivePair();
+someSocket.on("data", function(data) {
+    data = pson.decode(data);
+    ...
+});
+```
+
+API
+---
+The API is pretty much straight forward:
+
+* `PSON#encode(json: *): ByteBuffer` encodes JSON to PSON data
+  * `PSON#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
+  * `PSON#toArrayBuffer(json: *): ArrayBuffer` encodes straight to an ArrayBuffer
+* `PSON#decode(pson: ByteBuffer|Buffer|ArrayBuffer): *` decodes PSON data to JSON
+
+#### Progressive
+* `new PSON.ProgressivePair([initialDictionary: Array.<string>])` constructs a new progressive encoder and decoder pair
+  with a automatically filling keyword dictionary
+* `PSON.exclude(obj: Object)` Excludes an object's and its children's keywords from being added to the progressive
+   dictionary
+* `PSON.include(obj: Object)` Undoes the above
+
+#### Static
+* `new PSON.StaticPair([dictionary: Array.<string>])` constructs a new static encoder and decoder pair
+  with a static (or empty) dictionary
   
-which is, in this case and without any compression attempts, still about 9% smaller than JSON.
-
 Documentation
 -------------
-* [Documented sources](https://github.com/dcodeIO/PSON/tree/master/src)
-* [PSON.proto](https://github.com/dcodeIO/PSON/blob/master/src/PSON.proto) definition. It should
-  be quite easy to implement the protocol in a variety of programming languages using your favourite
-  [protobuf library](http://code.google.com/p/protobuf/wiki/ThirdPartyAddOns).
-* [Background reading](https://github.com/dcodeIO/ProtoBuf.js/wiki/ProtoBuf.js-vs-JSON)
+* PSON specification
+* API documentation
+
+**Note:** I just started working on this, so there might still be some bugs. Let me know by creating an issue!
+ PSON >=0.5 is also no longer based on protobuf but uses its own protocol format.
 
 **License:** [Apache License, Version 2.0](http://opensource.org/licenses/Apache-2.0)
