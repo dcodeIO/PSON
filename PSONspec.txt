@@ -23,12 +23,12 @@ Abstract
 
    Protocol JSON (PSON) is a binary format for the serialization of
    structured data. It is derived from JavaScript Object Notation
-   (JSON), as defined in RFC4627.
+   (JSON), as defined in [RFC4627].
    
    PSON can represent five primitive types (strings, numbers, booleans,
    null and raw bytes) and two structured types (objects and arrays).
    
-   A string is a sequence of zero or more UTF-8 characters.
+   A string is a sequence of zero or more UTF-8 characters [UNICODE].
    
    An object is an unordered collection of zero or more name/value
    pairs, where a name is a string and a value is a string, number,
@@ -115,11 +115,11 @@ Abstract
    Integer values greater than or equal -120 and less than or equal
    119 SHOULD be encoded as a single byte with a value between
    
-     ZERO = %0x00
+      ZERO = %0x00
      
    and
    
-     MAX = %0xEF
+      MAX = %0xEF
      
    corresponding to the value's zig-zag encoded varint representation.
    
