@@ -135,7 +135,12 @@ Abstract
    followed by its value as a zig-zag encoded 32 bit varint.
    
    If an integer value exceeds 32 bits of information, it SHOULD be
-   encoded as a 64 bit varint or MUST be reduced to 32 bits otherwise.
+   encoded as the single byte value
+   
+      LONG = %xF9
+      
+   followed by its value as a zig-zag encoded 64 bit varint or MUST be
+   reduced to 32 bits otherwise.
    
 2.2.2.  Floating point
 
@@ -202,8 +207,8 @@ Abstract
   
       BINARY = %xFF
      
-   followed by the number of raw bytes as a varint followed by the raw
-   bytes.
+   followed by the number of raw bytes as a 32 bit varint followed by
+   the raw bytes.
    
 3.  Dictionaries
 
