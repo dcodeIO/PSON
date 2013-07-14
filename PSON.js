@@ -150,9 +150,10 @@
              * Encodes a single JSON value to PSON.
              * @param {*} val JSON value
              * @param {!ByteBuffer} buf Target buffer
+             * @param {boolean=} excluded Whether keywords are to be excluded or not
              * @private
              */
-            Encoder.prototype._encodeValue = function(val, buf) {
+            Encoder.prototype._encodeValue = function(val, buf, excluded) {
                 if (val === null) {
                     buf.writeUint8(T.NULL);
                 } else {
@@ -224,13 +225,14 @@
                                     } else {
                                         buf.writeUint8(T.OBJECT);
                                         buf.writeVarint32(keys.length);
+                                        if (!excluded) excluded = !!val._PSON_EXCL_;
                                         for (var i=0; i<keys.length; i++) {
                                             var key = keys[i];
                                             if (this.dict.hasOwnProperty(key)) {
                                                 buf.writeUint8(T.STRING_GET);
                                                 buf.writeVarint32(this.dict[key]);
                                             } else {
-                                                if (this.progressive) {
+                                                if (this.progressive && !excluded) {
                                                     // Add to dictionary
                                                     this.dict[key] = this.next++;
                                                     buf.writeUint8(T.STRING_ADD);
@@ -516,7 +518,7 @@
          */
         PSON.exclude = function(obj) {
             if (typeof obj === 'object') {
-                Object.defineProperty(obj, "_PSON_FROZEN_", {
+                Object.defineProperty(obj, "_PSON_EXCL_", {
                     value: true,
                     enumerable: false,
                     configurable: true
@@ -530,7 +532,7 @@
          */
         PSON.include = function(obj) {
             if (typeof obj === 'object') {
-                delete obj["_PSON_FROZEN_"];
+                delete obj["_PSON_EXCL_"];
             }
         };
         

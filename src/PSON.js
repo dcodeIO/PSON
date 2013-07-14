@@ -52,7 +52,7 @@
          */
         PSON.exclude = function(obj) {
             if (typeof obj === 'object') {
-                Object.defineProperty(obj, "_PSON_FROZEN_", {
+                Object.defineProperty(obj, "_PSON_EXCL_", {
                     value: true,
                     enumerable: false,
                     configurable: true
@@ -66,7 +66,7 @@
          */
         PSON.include = function(obj) {
             if (typeof obj === 'object') {
-                delete obj["_PSON_FROZEN_"];
+                delete obj["_PSON_EXCL_"];
             }
         };
         
