@@ -8,12 +8,14 @@ How does it work?
 PSON combines the best of BJSON, ProtoBuf and ZIP to achieve a superior small footprint on the network level. Basic
 constants like `null`, `true` and `false` and small integer values are efficiently encoded as a single byte while
 integer values are always stored as varints like known from protobuf. Additionally it comes with progressive and static
-dictionaries to reduce data redundancy to the absolute minimum. In a nutshell:
+dictionaries to reduce data redundancy to a minimum. In a nutshell:
 
 * 256 one-byte values
 * Base 128 variable length integers (varints) from protobuf
 * 32bit floats if possible without precision loss
 * Progressive and static dictionaries
+* Raw binary data support through [ByteBuffer.js](https://github.com/dcodeIO/ByteBuffer.js)
+* Long support through [Long.js](https://github.com/dcodeIO/Long.js)
 
 A **PSON.StaticPair** contains the PSON encoder and decoder for a static (or empty) dictionary and can be shared between
 all connections. It's recommended for production.
