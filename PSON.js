@@ -266,6 +266,12 @@
         PSON.Decoder = (function(ByteBuffer, T) {
         
             /**
+             * Long.js.
+             * @type {?Long}
+             */
+            var Long = ByteBuffer.Long;
+        
+            /**
              * Constructs a new PSON Decoder.
              * @exports PSON.Decoder
              * @class A PSON Decoder.
@@ -340,7 +346,9 @@
                             }
                             return arr;
                         case T.INTEGER: return buf.readZigZagVarint32();
-                        case T.LONG: return buf.readZigZagVarint64();
+                        case T.LONG: // must not crash
+                            if (Long) return buf.readZigZagVarint64();
+                            return buf.readZigZagVarint32();
                         case T.FLOAT: return buf.readFloat32();
                         case T.DOUBLE: return buf.readFloat64();
                         case T.STRING: return buf.readVString();

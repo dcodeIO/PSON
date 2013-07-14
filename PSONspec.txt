@@ -1,4 +1,4 @@
-Draft                                                         D. Wirtz
+Working Draft                                                 D. Wirtz
                                                              July 2013
                                                              
                       Protocol JSON - PSON

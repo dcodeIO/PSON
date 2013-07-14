@@ -1,21 +1,21 @@
 ![PSON](https://raw.github.com/dcodeIO/PSON/master/PSON.png)
 ====
-**PSON** is a super efficient binary serialization format for JSON. It outperforms JSON, BSON, BJSON, Smile and, if used
+**PSON** is a super efficient protocol serialization format for JSON. It outperforms JSON, BSON, BJSON and, if used
 wisely, even protobuf and thrift in encoding size!
 
 How does it work?
 -----------------
-PSON combines the best of BJSON, ProtoBuf and ZIP to achieve a superior small footprint on the network level. Basic
-constants like `null`, `true` and `false` and small integer values are efficiently encoded as a single byte while
-integer values are always stored as varints like known from protobuf. Additionally it comes with progressive and static
+PSON combines the best of JSON, BJSON, ProtoBuf and ZIP to achieve a superior small footprint on the network level.
+Basic constants like `null`, `true` and `false` and small integer values are efficiently encoded as a single byte.
+Other integer values are always encoded as variable length integers. Additionally it comes with progressive and static
 dictionaries to reduce data redundancy to a minimum. In a nutshell:
 
 * 256 single byte values
 * Base 128 variable length integers (varints) as in protobuf
 * 32 bit floats instead of 64 bit doubles if possible without information loss
 * Progressive and static dictionaries
-* Raw binary data support through [ByteBuffer.js](https://github.com/dcodeIO/ByteBuffer.js)
-* Long support through [Long.js](https://github.com/dcodeIO/Long.js)
+* Raw binary data support ([ByteBuffer.js](https://github.com/dcodeIO/ByteBuffer.js))
+* Optional long support ([Long.js](https://github.com/dcodeIO/Long.js))
 
 A **PSON.StaticPair** contains the PSON encoder and decoder for a static (or empty) dictionary and can be shared between
 all connections. It's recommended for production.
@@ -46,7 +46,14 @@ The test suite contains the following basic example message:
 * **PSON** without a dictionary: 103 bytes (about **22% smaller** than JSON)
 * **PSON** with a progressive dictionary: 103 bytes for the first and 59 bytes for each subsequent message (about 
   **22% smaller** for the first and about **55% smaller** for each subsequent message than JSON.
-* **PSON** with the same but static dictionary: 59 bytes for each message (about **55% smaller** than JSON)           
+* **PSON** with the same but static dictionary: 59 bytes for each message (about **55% smaller** than JSON)
+         
+```text
+ F6 08 FE 00 FC 06 77 6F 72 6C 64 21 FE 01 F8 A4   ......world!....
+ 8B B0 99 79 FE 02 FB F6 0B 76 C3 B6 45 89 3F FE   ...y.....v..E.?.
+ 03 F1 FE 04 F2 FE 05 F0 FE 06 F6 01 FE 07 FC 04   ................
+ 74 68 61 74 FE 08 F7 03 02 04 06                  that.......
+```
 
 Usage
 -----
@@ -123,9 +130,9 @@ The API is pretty much straight forward:
 #### Progressive
 * `new PSON.ProgressivePair([initialDictionary: Array.<string>])` constructs a new progressive encoder and decoder pair
   with an automatically filling keyword dictionary
-* `ProgressivePair#exclude(obj: Object)` Excludes an object's and its children's keywords from being added to the progressive
+* `PSON.ProgressivePair#exclude(obj: Object)` Excludes an object's and its children's keywords from being added to the progressive
    dictionary
-* `ProgressivePair#include(obj: Object)` Undoes the former
+* `PSON.ProgressivePair#include(obj: Object)` Undoes the former
 
 #### Static
 * `new PSON.StaticPair([dictionary: Array.<string>])` constructs a new static encoder and decoder pair
