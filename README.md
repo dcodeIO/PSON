@@ -43,9 +43,9 @@ The test suite contains the following basic example message:
 ```
 
 * **JSON** stringify: 133 bytes
-* **PSON** without a dictionary: 105 bytes (about **23% smaller** than JSON)
-* **PSON** with a progressive dictionary: 105 bytes for the first and 59 bytes for each subsequent message (about 
-  **23% smaller** for the first and about **55% smaller** for each subsequent message than JSON.
+* **PSON** without a dictionary: 103 bytes (about **23% smaller** than JSON)
+* **PSON** with a progressive dictionary: 103 bytes for the first and 59 bytes for each subsequent message (about 
+  **22% smaller** for the first and about **55% smaller** for each subsequent message than JSON.
 * **PSON** with the same but static dictionary: 59 bytes for each message (about **55% smaller** than JSON)           
 
 Usage
