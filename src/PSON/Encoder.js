@@ -28,6 +28,12 @@ PSON.Encoder = (function(ByteBuffer, T) {
     fbuf.length = 4;
 
     /**
+     * Long.js.
+     * @type {?Long}
+     */
+    var Long = ByteBuffer.Long;
+
+    /**
      * Constructs a new PSON Encoder.
      * @exports PSON.Encoder
      * @class A PSON Encoder.
@@ -144,6 +150,9 @@ PSON.Encoder = (function(ByteBuffer, T) {
                                 this._encodeValue(val[i], buf);
                             }
                         }
+                    } else if (Long && val instanceof Long) {
+                        buf.writeUint8(T.LONG);
+                        buf.writeZigZagVarint64(val);
                     } else {
                         try {
                             val = ByteBuffer.wrap(val);

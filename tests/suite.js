@@ -1,4 +1,6 @@
-var PSON = require("../PSON.js");
+var PSON = require("../PSON.js"),
+    ByteBuffer = require("bytebuffer"),
+    Long = ByteBuffer.Long;
 
 module.exports = {
 
@@ -23,6 +25,9 @@ module.exports = {
         test.strictEqual(bb.LE().readFloat32(1), 0.25);
         test.equal((bb=pson.encode(0.011).compact()).toHex(), "<FB BA 49 0C 02 2B 87 86 3F>");
         test.strictEqual(bb.LE().readFloat64(1), 0.011);
+        var l = new Long.fromNumber(1);
+        test.equal((bb=pson.encode(l).compact()).toHex(), "<F9 02>");
+        test.ok(l.equals(bb.readZigZagVarint64(1).value));
         test.done();
     },
     
