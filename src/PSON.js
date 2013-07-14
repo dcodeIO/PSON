@@ -29,8 +29,8 @@
 
         /**
          * PSON namespace.
-         * @namespace
          * @exports PSON
+         * @namespace
          */
         var PSON = {};
 
@@ -45,6 +45,30 @@
         // #include "PSON/StaticPair.js"
         
         // #include "PSON/ProgressivePair.js"
+
+        /**
+         * Excluces an object's and its children's keys from being added to a progressive dictionary.
+         * @param {Object} obj Now excluded object
+         */
+        PSON.exclude = function(obj) {
+            if (typeof obj === 'object') {
+                Object.defineProperty(obj, "_PSON_FROZEN_", {
+                    value: true,
+                    enumerable: false,
+                    configurable: true
+                });
+            }
+        };
+
+        /**
+         * Undoes exclusion of an object's and its children's keys from being added to a progressive dictionary.
+         * @param {Object} obj Now included object
+         */
+        PSON.include = function(obj) {
+            if (typeof obj === 'object') {
+                delete obj["_PSON_FROZEN_"];
+            }
+        };
         
         return PSON;
     }

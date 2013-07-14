@@ -28,10 +28,10 @@ PSON.T = (function() {
     var T = {};
     
     T.ZERO       = 0x00; // 0
-    //             0x01; // 1
-    //             0x02; // -1
-    //             ...   // zig-zag encoded varint
-    T.MAX        = 0xEF; // max. zig-tag encoded varint
+    //             0x01; // -1
+    //             0x02; // 1
+    //             ...   // zig-zag encoded varints
+    T.MAX        = 0xEF; // -120, max. zig-tag encoded varint
     
     T.NULL       = 0xF0; // null
     T.TRUE       = 0xF1; // true

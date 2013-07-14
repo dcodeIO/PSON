@@ -29,8 +29,8 @@
 
         /**
          * PSON namespace.
-         * @namespace
          * @exports PSON
+         * @namespace
          */
         var PSON = {};
 
@@ -47,10 +47,10 @@
             var T = {};
             
             T.ZERO       = 0x00; // 0
-            //             0x01; // 1
-            //             0x02; // -1
-            //             ...   // zig-zag encoded varint
-            T.MAX        = 0xEF; // max. zig-tag encoded varint
+            //             0x01; // -1
+            //             0x02; // 1
+            //             ...   // zig-zag encoded varints
+            T.MAX        = 0xEF; // -120, max. zig-tag encoded varint
             
             T.NULL       = 0xF0; // null
             T.TRUE       = 0xF1; // true
@@ -77,6 +77,13 @@
          * @alias PSON.Encoder
          */
         PSON.Encoder = (function(ByteBuffer, T) {
+        
+            /**
+             * Float conversion test buffer.
+             * @type {!ByteBuffer}
+             */
+            var fbuf = new ByteBuffer(4);
+            fbuf.length = 4;
         
             /**
              * Constructs a new PSON Encoder.
@@ -171,9 +178,14 @@
                                     buf.writeZigZagVarint32(val);
                                 }
                             } else {
-                                // TODO: float
-                                buf.writeUint8(T.DOUBLE);
-                                buf.writeFloat64(val);
+                                fbuf.writeFloat32(val, 0);
+                                if (val === fbuf.readFloat32(0)) {
+                                    buf.writeUint8(T.FLOAT);
+                                    buf.writeFloat32(val);
+                                } else {
+                                    buf.writeUint8(T.DOUBLE);
+                                    buf.writeFloat64(val);
+                                }
                             }
                             break;
                         case 'boolean':
@@ -467,11 +479,52 @@
             
             // Extends PSON.Pair
             ProgressivePair.prototype = Object.create(Pair.prototype);
+        
+        
+            /**
+             * Alias for {@link PSON.exclude}.
+             * @param {Object} obj Now excluded object
+             */
+            ProgressivePair.prototype.exclude = function(obj) {
+                PSON.exclude(obj);
+            };
+        
+            /**
+             * Alias for {@link PSON.include}.
+             * @param {Object} obj New included object
+             */
+            ProgressivePair.prototype.include = function(obj) {
+                PSON.include(obj);
+            };
             
             return ProgressivePair;
             
         })(PSON.Pair, PSON.Encoder, PSON.Decoder);
-                
+        
+        /**
+         * Excluces an object's and its children's keys from being added to a progressive dictionary.
+         * @param {Object} obj Now excluded object
+         */
+        PSON.exclude = function(obj) {
+            if (typeof obj === 'object') {
+                Object.defineProperty(obj, "_PSON_FROZEN_", {
+                    value: true,
+                    enumerable: false,
+                    configurable: true
+                });
+            }
+        };
+
+        /**
+         * Undoes exclusion of an object's and its children's keys from being added to a progressive dictionary.
+         * @param {Object} obj Now included object
+         */
+        PSON.include = function(obj) {
+            if (typeof obj === 'object') {
+                delete obj["_PSON_FROZEN_"];
+            }
+        };
+        
         return PSON;
     }
 

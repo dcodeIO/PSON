@@ -21,6 +21,13 @@
 PSON.Encoder = (function(ByteBuffer, T) {
 
     /**
+     * Float conversion test buffer.
+     * @type {!ByteBuffer}
+     */
+    var fbuf = new ByteBuffer(4);
+    fbuf.length = 4;
+
+    /**
      * Constructs a new PSON Encoder.
      * @exports PSON.Encoder
      * @class A PSON Encoder.
@@ -113,9 +120,14 @@ PSON.Encoder = (function(ByteBuffer, T) {
                             buf.writeZigZagVarint32(val);
                         }
                     } else {
-                        // TODO: float
-                        buf.writeUint8(T.DOUBLE);
-                        buf.writeFloat64(val);
+                        fbuf.writeFloat32(val, 0);
+                        if (val === fbuf.readFloat32(0)) {
+                            buf.writeUint8(T.FLOAT);
+                            buf.writeFloat32(val);
+                        } else {
+                            buf.writeUint8(T.DOUBLE);
+                            buf.writeFloat64(val);
+                        }
                     }
                     break;
                 case 'boolean':

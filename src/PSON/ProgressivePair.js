@@ -40,6 +40,23 @@ PSON.ProgressivePair = (function(Pair, Encoder, Decoder) {
     
     // Extends PSON.Pair
     ProgressivePair.prototype = Object.create(Pair.prototype);
+
+
+    /**
+     * Alias for {@link PSON.exclude}.
+     * @param {Object} obj Now excluded object
+     */
+    ProgressivePair.prototype.exclude = function(obj) {
+        PSON.exclude(obj);
+    };
+
+    /**
+     * Alias for {@link PSON.include}.
+     * @param {Object} obj New included object
+     */
+    ProgressivePair.prototype.include = function(obj) {
+        PSON.include(obj);
+    };
     
     return ProgressivePair;
     

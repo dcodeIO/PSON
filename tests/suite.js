@@ -14,11 +14,15 @@ module.exports = {
     },
     
     "number": function(test) {
-        var pson = new PSON.StaticPair();
+        var pson = new PSON.StaticPair(), bb;
         test.equal(pson.encode(0).compact().toHex(), "<00>");
         test.equal(pson.encode(-120).compact().toHex(), "<EF>");
-        test.equal(pson.encode(120).compact().toHex(), "<F8 F0 01>");
-        test.equal(pson.encode(0.011).compact().toHex(), "<FB BA 49 0C 02 2B 87 86 3F>");
+        test.equal((bb=pson.encode(120).compact()).toHex(), "<F8 F0 01>");
+        test.strictEqual(bb.LE().readZigZagVarint32(1).value, 120);
+        test.equal((bb=pson.encode(0.25).compact()).toHex(), "<FA 00 00 80 3E>");
+        test.strictEqual(bb.LE().readFloat32(1), 0.25);
+        test.equal((bb=pson.encode(0.011).compact()).toHex(), "<FB BA 49 0C 02 2B 87 86 3F>");
+        test.strictEqual(bb.LE().readFloat64(1), 0.011);
         test.done();
     },
     

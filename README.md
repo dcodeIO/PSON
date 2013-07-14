@@ -12,6 +12,7 @@ dictionaries to reduce data redundancy to the absolute minimum. In a nutshell:
 
 * 256 one-byte values
 * Zig-zag encoded base 128 variable length integers from protobuf
+* 32bit floats if possible without precision loss
 * Keyword dictionaries
 
 A **PSON.StaticPair** contains the PSON encoder and decoder for a static (or empty) dictionary and can be shared between
@@ -92,7 +93,8 @@ Example
 -------
 ```js
 // Sender
-var pson = new PSON.ProgressivePair();
+var initialDictionary = ["hello"];
+var pson = new PSON.ProgressivePair(initialDictionary);
 var data = { "hello": "world!" };
 var buffer = pson.encode(data);
 someSocket.send(buffer);
@@ -100,8 +102,8 @@ someSocket.send(buffer);
 
 ```js
 // Receiver
-var initialDictionary = [ same! ];
-var pson = new PSON.ProgressivePair();
+var initialDictionary = ["hello"];
+var pson = new PSON.ProgressivePair(initialDictionary);
 someSocket.on("data", function(data) {
     data = pson.decode(data);
     ...
@@ -119,10 +121,10 @@ The API is pretty much straight forward:
 
 #### Progressive
 * `new PSON.ProgressivePair([initialDictionary: Array.<string>])` constructs a new progressive encoder and decoder pair
-  with a automatically filling keyword dictionary
+  with an automatically filling keyword dictionary
 * `PSON.exclude(obj: Object)` Excludes an object's and its children's keywords from being added to the progressive
    dictionary
-* `PSON.include(obj: Object)` Undoes the above
+* `PSON.include(obj: Object)` Undoes the former
 
 #### Static
 * `new PSON.StaticPair([dictionary: Array.<string>])` constructs a new static encoder and decoder pair
@@ -130,10 +132,11 @@ The API is pretty much straight forward:
   
 Documentation
 -------------
-* PSON specification
-* API documentation
+* [PSON specification](https://github.com/dcodeIO/PSON/blog/master/PSONspec.txt)
+* [API documentation](http://htmlpreview.github.io/?http://raw.github.com/dcodeIO/PSON/master/docs/PSON.html)
 
 **Note:** I just started working on this, so there might still be some bugs. Let me know by creating an issue!
- PSON >=0.5 is also no longer based on protobuf but uses its own protocol format.
+PSON >=0.5 is also no longer based on protobuf but uses its own
+[encoding format]((https://github.com/dcodeIO/PSON/blog/master/PSONspec.txt)).
 
 **License:** [Apache License, Version 2.0](http://opensource.org/licenses/Apache-2.0)
