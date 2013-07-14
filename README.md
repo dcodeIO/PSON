@@ -145,6 +145,6 @@ Documentation
 
 **Note:** I just started working on this, so there might still be some bugs. Let me know by creating an issue!
 PSON >=0.5 is also no longer based on protobuf but uses its own
-[encoding format](https://github.com/dcodeIO/PSON/blog/master/PSONspec.txt).
+[encoding format](https://github.com/dcodeIO/PSON/blob/master/PSONspec.txt).
 
 **License:** [Apache License, Version 2.0](http://opensource.org/licenses/Apache-2.0)
