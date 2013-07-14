@@ -57,13 +57,11 @@ Abstract
    
 2.  PSON Grammar
 
-   PSON data is a sequence of single byte tokens, varints and arbitrary
-   bytes.
+   PSON data is a sequence of tokens, varints and arbitrary bytes.
    
 2.1 Values
    
-   A PSON value MUST start with a single byte value and MAY be
-   followed by
+   A PSON value MUST start with a token and MAY be followed by
    
       a varint
    
@@ -77,7 +75,7 @@ Abstract
       
    No other combinations are allowed.
    
-   These are the 256 single byte values:
+   These are the 256 tokens:
    
       ZERO       = %x00
               ...
@@ -89,26 +87,24 @@ Abstract
       EOBJECT    = %xF3
       EARRAY     = %xF4
       ESTRING    = %xF5
-      OBJECT     = %xF6
-      ARRAY      = %xF7
-      INTEGER    = %xF8
-      LONG       = %xF9
-      FLOAT      = %xFA
-      DOUBLE     = %xFB
-      STRING     = %xFC
-      STRING_ADD = %xFD
-      STRING_GET = %xFE
-      BINARY     = %xFF
+      OBJECT     = %xF6 ; + varint32 + key/values
+      ARRAY      = %xF7 ; + varint32 + values
+      INTEGER    = %xF8 ; + varint32
+      LONG       = %xF9 ; + varint64
+      FLOAT      = %xFA ; + float32
+      DOUBLE     = %xFB ; + float64
+      STRING     = %xFC ; + varint32 + bytes
+      STRING_ADD = %xFD ; + varint32 + bytes
+      STRING_GET = %xFE ; + varint32
+      BINARY     = %xFF ; + varint32 + bytes
       
 2.2.  Boolean
 
-   A boolean value evaluating to true MUST be represented by the
-   single byte value:
+   A boolean value evaluating to true MUST be encoded as the token:
   
       TRUE = %xF1
    
-   A boolean value evaluating to false MUST be represented by the
-   single byte value:
+   A boolean value evaluating to false MUST be encoded as the token:
   
       FALSE = %xF2
       
@@ -128,7 +124,7 @@ Abstract
    corresponding to the value's zig-zag encoded varint representation.
    
    Otherwise and values less than -120 or greater than 119 MUST be
-   represented by the single byte value
+   encoded as the token
    
       INTEGER = %xF8
       
@@ -144,10 +140,20 @@ Abstract
    
 2.2.2.  Floating point
 
-   Floating point numbers MUST be encoded either as a little endian
-   32 bit float or 64 bit double. A 32 bit float SHOULD be used if the
-   serialized value can be encoded as 32 bits without losing any
-   information, a 64 bit double MUST be used otherwise.
+   A 32 bit float SHOULD be encoded as the token
+   
+      FLOAT = %xFA
+      
+   followed by the little endian 32 bit float value.
+   
+   Otherwise and a 64 bit double precision float MUST be encoded as
+   the token
+   
+      DOUBLE = %xFB
+      
+   followed by the little endian 64 bit float value. If a 64 bit float
+   can be converted to a 32 bit float without losing any information,
+   it SHOULD be encoded as a 32 bit float instead.
    
 2.2.  Arrays
 

@@ -6,11 +6,11 @@ wisely, even protobuf and thrift in encoding size!
 How does it work?
 -----------------
 PSON combines the best of JSON, BJSON, ProtoBuf and ZIP to achieve a superior small footprint on the network level.
-Basic constants like `null`, `true` and `false` and small integer values are efficiently encoded as a single byte.
-Other integer values are always encoded as variable length integers. Additionally it comes with progressive and static
-dictionaries to reduce data redundancy to a minimum. In a nutshell:
+Basic constants and small integer values are efficiently encoded as a single byte. Other integer values are always
+encoded as variable length integers. Additionally it comes with progressive and static dictionaries to reduce data
+redundancy to a minimum. In a nutshell:
 
-* 256 single byte values
+* 246 single byte values
 * Base 128 variable length integers (varints) as in protobuf
 * 32 bit floats instead of 64 bit doubles if possible without information loss
 * Progressive and static dictionaries
