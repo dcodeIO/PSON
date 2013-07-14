@@ -68,8 +68,11 @@ module.exports = {
             test.log("JSON: "+(jsonLen = JSON.stringify(data).length));
             var bb = pson.encode(data).compact();
             test.log("PSON: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
-            decData = pson.decode(bb);
+            var decData = pson.decode(bb);
             test.deepEqual(data, decData);
+            
+            console.log(""); bb.printDebug();
+            
             test.done();
         },
         
@@ -85,7 +88,7 @@ module.exports = {
                 "obj": {
                     "what": "that"
                 },
-                "arr": [1,2,3,4,5]
+                "arr": [1,2,3]
             };
             var jsonLen;
             test.log("JSON: "+(jsonLen = JSON.stringify(data).length));
@@ -96,6 +99,7 @@ module.exports = {
             bb = pson.encode(data).compact();
             test.log("PSON w/o dict: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
             decData = pson.decode(bb);
+            console.log(""); bb.printDebug();
             test.deepEqual(data, decData);
             test.done();
         }
