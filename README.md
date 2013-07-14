@@ -11,16 +11,15 @@ integer values are always stored as varints like known from protobuf. Additional
 dictionaries to reduce data redundancy to the absolute minimum. In a nutshell:
 
 * 256 one-byte values
-* Zig-zag encoded base 128 variable length integers from protobuf
+* Base 128 variable length integers (varints) from protobuf
 * 32bit floats if possible without precision loss
-* Keyword dictionaries
+* Progressive and static dictionaries
 
 A **PSON.StaticPair** contains the PSON encoder and decoder for a static (or empty) dictionary and can be shared between
 all connections. It's recommended for production.
 
 A **PSON.ProgressivePair** contains the PSON encoder and decoder for a progressive (automatically filling) dictionary.
-On the one hand this requires no dictionary work from the developer but on the other is required on a per-connection
-basis.
+On the one hand this requires no dictionary work from the developer but on the other requires one pair per connection.
 
 tl;dr Numbers, please!
 ----------------------
@@ -114,17 +113,17 @@ API
 ---
 The API is pretty much straight forward:
 
-* `PSON#encode(json: *): ByteBuffer` encodes JSON to PSON data
-  * `PSON#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
-  * `PSON#toArrayBuffer(json: *): ArrayBuffer` encodes straight to an ArrayBuffer
-* `PSON#decode(pson: ByteBuffer|Buffer|ArrayBuffer): *` decodes PSON data to JSON
+* `PSON.Pair#encode(json: *): ByteBuffer` encodes JSON to PSON data
+  * `PSON.Pair#toBuffer(json: *): Buffer` encodes straight to a node.js Buffer
+  * `PSON.Pair#toArrayBuffer(json: *): ArrayBuffer` encodes straight to an ArrayBuffer
+* `PSON.Pair#decode(pson: ByteBuffer|Buffer|ArrayBuffer): *` decodes PSON data to JSON
 
 #### Progressive
 * `new PSON.ProgressivePair([initialDictionary: Array.<string>])` constructs a new progressive encoder and decoder pair
   with an automatically filling keyword dictionary
-* `PSON.exclude(obj: Object)` Excludes an object's and its children's keywords from being added to the progressive
+* `ProgressivePair#exclude(obj: Object)` Excludes an object's and its children's keywords from being added to the progressive
    dictionary
-* `PSON.include(obj: Object)` Undoes the former
+* `ProgressivePair#include(obj: Object)` Undoes the former
 
 #### Static
 * `new PSON.StaticPair([dictionary: Array.<string>])` constructs a new static encoder and decoder pair
@@ -132,7 +131,7 @@ The API is pretty much straight forward:
   
 Documentation
 -------------
-* [PSON specification](https://github.com/dcodeIO/PSON/blog/master/PSONspec.txt)
+* [PSON specification](https://github.com/dcodeIO/PSON/blob/master/PSONspec.txt)
 * [API documentation](http://htmlpreview.github.io/?http://raw.github.com/dcodeIO/PSON/master/docs/PSON.html)
 
 **Note:** I just started working on this, so there might still be some bugs. Let me know by creating an issue!
