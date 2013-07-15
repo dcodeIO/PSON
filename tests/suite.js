@@ -1,6 +1,8 @@
 var PSON = require("../PSON.js"),
     ByteBuffer = require("bytebuffer"),
-    Long = ByteBuffer.Long;
+    Long = ByteBuffer.Long,
+    pkg = require("../package.json"),
+    pkgDict = require("../dicts/package.json");
 
 module.exports = {
 
@@ -49,7 +51,8 @@ module.exports = {
         test.done();
     },
     
-    "decode": {
+    "en/decode": {
+        
         "static": function(test) {
             var pson = new PSON.StaticPair(["hello", "time", "float", "boolean", "otherbool", "null", "obj", "what", "arr"]);
             var data = {
@@ -70,9 +73,7 @@ module.exports = {
             test.log("PSON: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
             var decData = pson.decode(bb);
             test.deepEqual(data, decData);
-            
             console.log(""); bb.printDebug();
-            
             test.done();
         },
         
@@ -103,5 +104,15 @@ module.exports = {
             test.deepEqual(data, decData);
             test.done();
         }
-    }    
+    },
+    
+    "package": function(test) {
+        test.log("JSON: "+(JSON.stringify(pkg).length));
+        var pson = new PSON.StaticPair(pkgDict);
+        var bb = pson.encode(pkg).compact();
+        test.log("PSON: "+bb.length);
+        console.log(""); bb.printDebug();
+        test.deepEqual(pkg, pson.decode(bb));
+        test.done();
+    }
 };

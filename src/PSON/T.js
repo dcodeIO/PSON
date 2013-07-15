@@ -31,7 +31,7 @@ PSON.T = (function() {
     //             0x01; // -1
     //             0x02; // 1
     //             ...   // zig-zag encoded varints
-    T.MAX        = 0xEF; // -120, max. zig-tag encoded varint
+    T.MAX        = 0xEF; // -120, max. zig-zag encoded varint
     
     T.NULL       = 0xF0; // null
     T.TRUE       = 0xF1; // true

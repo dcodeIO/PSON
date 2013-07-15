@@ -151,9 +151,13 @@ Abstract
    
       DOUBLE = %xFB
       
-   followed by the little endian 64 bit float value. If a 64 bit float
-   can be converted to a 32 bit float without losing any information,
-   it SHOULD be encoded as a 32 bit float instead.
+   followed by the little endian 64 bit float value.
+   
+   If a 64 bit float can be converted to a 32 bit float without losing
+   any information, it SHOULD be encoded as a 32 bit float instead.
+   
+   If a float can be converted to an integer without losing any
+   information, it SHOULD be encoded as an integer.
    
 2.2.  Arrays
 

@@ -55,6 +55,12 @@ The test suite contains the following basic example message:
  74 68 61 74 FE 08 F7 03 02 04 06                  that.......
 ```
 
+Another example that's also contained in the test suite is encoding our package.json, which is of course a string value
+centered file, to PSON using a [static dictionary](https://github.com/dcodeIO/PSON/blob/master/dicts/package.json):
+
+* **JSON** stringify: 813 bytes
+* **PSON** static: 613 bytes (**25% smaller** than JSON)
+
 Usage
 -----
 
@@ -73,7 +79,7 @@ var PSON = require("pson");
 require.config({
     ...
     "paths": {
-        "Long": "/path/to/Long.js",
+        "Long": "/path/to/Long.js", // optional
         "ByteBuffer": "/path/to/ByteBuffer.js",
         "PSON": "/path/to/PSON.js"
     },
@@ -87,7 +93,7 @@ require(["PSON"], function(PSON) {
 #### Browser
 
 ```html
-<script src="//raw.github.com/dcodeIO/Long.js/master/Long.min.js"></script>
+<script src="//raw.github.com/dcodeIO/Long.js/master/Long.min.js"></script><!-- optional -->
 <script src="//raw.github.com/dcodeIO/ByteBuffer.js/master/ByteBuffer.min.js"></script>
 <script src="//raw.github.com/dcodeIO/PSON/master/PSON.min.js"></script>
 ```
