@@ -68,7 +68,7 @@
         "sunos",
         "win32",
         "!darwin",
-        "!freebst",
+        "!freebsd",
         "!linux",
         "!sunos",
         "!win32",
