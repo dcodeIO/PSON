@@ -59,7 +59,8 @@ Another example that's also contained in the test suite is encoding our package.
 centered file, to PSON using a [static dictionary](https://github.com/dcodeIO/PSON/blob/master/dicts/package.json):
 
 * **JSON** stringify: 813 bytes
-* **PSON** static: 613 bytes (exactly **25% smaller** than JSON)
+* **PSON** with empty dict: 760 bytes (about **6% smaller** than JSON)
+* **PSON** with static dict: 613 bytes (about **24% smaller** than JSON)
 
 Usage
 -----
@@ -148,9 +149,5 @@ Documentation
 -------------
 * [PSON specification](https://github.com/dcodeIO/PSON/blob/master/PSONspec.txt)
 * [API documentation](http://htmlpreview.github.io/?http://raw.github.com/dcodeIO/PSON/master/docs/PSON.html)
-
-**Note:** I just started working on this, so there might still be some bugs. Let me know by creating an issue!
-PSON >=0.5 is also no longer based on protobuf but uses its own
-[encoding format](https://github.com/dcodeIO/PSON/blob/master/PSONspec.txt).
 
 **License:** [Apache License, Version 2.0](http://opensource.org/licenses/Apache-2.0)

@@ -70,7 +70,7 @@ module.exports = {
             var jsonLen;
             test.log("JSON: "+(jsonLen = JSON.stringify(data).length));
             var bb = pson.encode(data).compact();
-            test.log("PSON: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+            test.log("PSON static: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
             var decData = pson.decode(bb);
             test.deepEqual(data, decData);
             console.log(""); bb.printDebug();
@@ -94,11 +94,11 @@ module.exports = {
             var jsonLen;
             test.log("JSON: "+(jsonLen = JSON.stringify(data).length));
             var bb = pson.encode(data).compact();
-            test.log("PSON w/ dict: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+            test.log("PSON first: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
             var decData = pson.decode(bb);
             test.deepEqual(data, decData);
             bb = pson.encode(data).compact();
-            test.log("PSON w/o dict: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+            test.log("PSON again: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
             decData = pson.decode(bb);
             console.log(""); bb.printDebug();
             test.deepEqual(data, decData);
@@ -107,10 +107,14 @@ module.exports = {
     },
     
     "package": function(test) {
-        test.log("JSON: "+(JSON.stringify(pkg).length));
-        var pson = new PSON.StaticPair(pkgDict);
+        var jsonLen;
+        test.log("JSON: "+(jsonLen=JSON.stringify(pkg).length));
+        var pson = new PSON.StaticPair();
         var bb = pson.encode(pkg).compact();
-        test.log("PSON: "+bb.length);
+        test.log("PSON w/o dict: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+        pson = new PSON.StaticPair(pkgDict);
+        bb = pson.encode(pkg).compact();
+        test.log("PSON w/  dict: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
         console.log(""); bb.printDebug();
         test.deepEqual(pkg, pson.decode(bb));
         test.done();
