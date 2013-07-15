@@ -17,6 +17,9 @@ redundancy to a minimum. In a nutshell:
 * Raw binary data support ([ByteBuffer.js](https://github.com/dcodeIO/ByteBuffer.js))
 * Optional long support ([Long.js](https://github.com/dcodeIO/Long.js))
 
+This repository contains a plain **node.js/CommonJS, RequireJS/AMD and Browser compatible** JavaScript implementation
+of the [PSON specifications](https://github.com/dcodeIO/PSON/blob/master/PSONspec.txt).
+
 A **PSON.StaticPair** contains the PSON encoder and decoder for a static (or empty) dictionary and can be shared between
 all connections. It's recommended for production.
 
@@ -56,11 +59,11 @@ The test suite contains the following basic example message:
 ```
 
 Another example that's also contained in the test suite is encoding our package.json, which is of course a string value
-centered file, to PSON using a [static dictionary](https://github.com/dcodeIO/PSON/blob/master/dicts/package.json):
+centered file, to PSON using a general purpose static dictionary:
 
 * **JSON** stringify: 813 bytes
 * **PSON** with empty dict: 760 bytes (about **6% smaller** than JSON)
-* **PSON** with static dict: 613 bytes (about **24% smaller** than JSON)
+* **PSON** with [static dict](https://github.com/dcodeIO/PSON/blob/master/dicts/package.json): 613 bytes (about **24% smaller** than JSON)
 
 Usage
 -----
