@@ -59,7 +59,7 @@ Another example that's also contained in the test suite is encoding our package.
 centered file, to PSON using a [static dictionary](https://github.com/dcodeIO/PSON/blob/master/dicts/package.json):
 
 * **JSON** stringify: 813 bytes
-* **PSON** static: 613 bytes (**25% smaller** than JSON)
+* **PSON** static: 613 bytes (exactly **25% smaller** than JSON)
 
 Usage
 -----
