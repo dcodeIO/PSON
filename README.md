@@ -14,11 +14,14 @@ redundancy to a minimum. In a nutshell:
 * Base 128 variable length integers (varints) as in protobuf
 * 32 bit floats instead of 64 bit doubles if possible without information loss
 * Progressive and static dictionaries
-* Raw binary data support ([ByteBuffer.js](https://github.com/dcodeIO/ByteBuffer.js))
-* Optional long support ([Long.js](https://github.com/dcodeIO/Long.js))
+* Raw binary data support
+* Long support
 
+Reference implementation
+------------------------
 This repository contains a plain **node.js/CommonJS, RequireJS/AMD and Browser compatible** JavaScript implementation
-of the [PSON specifications](https://github.com/dcodeIO/PSON/blob/master/PSONspec.txt).
+of the [PSON specification](https://github.com/dcodeIO/PSON/blob/master/PSONspec.txt) on top of 
+[ByteBuffer.js](https://github.com/dcodeIO/ByteBuffer.js) and optionally [Long.js](https://github.com/dcodeIO/Long.js):
 
 A **PSON.StaticPair** contains the PSON encoder and decoder for a static (or empty) dictionary and can be shared between
 all connections. It's recommended for production.
