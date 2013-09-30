@@ -360,7 +360,9 @@
                             return this.dict[buf.readVarint32()];
                         case T.BINARY:
                             t = buf.readVarint32();
-                            return buf.slice(buf.offset, buf.offset+t);
+                            var ret = buf.slice(buf.offset, buf.offset+t);
+                            buf.offset += t;
+                            return ret;
                         default:
                             throw(new Error("Illegal type at "+buf.offset+": "+t));
                     }
