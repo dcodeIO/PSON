@@ -158,7 +158,7 @@ PSON.Encoder = (function(ByteBuffer, T) {
                         try {
                             val = ByteBuffer.wrap(val);
                             buf.writeUint8(T.BINARY);
-                            buf.writeVarint32(val.length);
+                            buf.writeVarint32(val.remaining());
                             buf.append(val);
                         } catch (e) {
                             var keys = Object.keys(val);

@@ -1,7 +1,7 @@
 {
     "name": "pson",
     "description": "A super efficient protocol serialization format for JSON.",
-    "version": "0.6.2",
+    "version": "0.6.3",
     "author": "Daniel Wirtz <dcode@dcode.io>",
     "main": "PSON.js",
     "repository": {

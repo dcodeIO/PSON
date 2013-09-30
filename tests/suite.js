@@ -42,6 +42,7 @@ module.exports = {
     "object": function(test) {
         var pson = new PSON.StaticPair();
         test.equal(pson.encode({"a":"b"}).compact().toHex(), "<F6 01 FC 01 61 FC 01 62>");
+        test.equal(pson.encode({"a":"b","c":"d"}).compact().toHex(), "<F6 02 FC 01 61 FC 01 62 FC 01 63 FC 01 64>");
         test.done();
     },
     
@@ -49,6 +50,14 @@ module.exports = {
         var pson = new PSON.StaticPair();
         test.equal(pson.encode([1,2,3]).compact().toHex(), "<F7 03 02 04 06>");
         test.done();
+    },
+
+    "buffer": function(test) {
+    	var pson = new PSON.StaticPair();
+    	var buf = new Buffer(4);
+    	buf.writeInt32LE(-1, 0);
+    	test.equal(pson.encode(buf).compact().toHex(), "<FF 04 FF FF FF FF>");
+    	test.done();
     },
     
     "en/decode": {

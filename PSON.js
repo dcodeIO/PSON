@@ -50,7 +50,7 @@
             //             0x01; // -1
             //             0x02; // 1
             //             ...   // zig-zag encoded varints
-            T.MAX        = 0xEF; // -120, max. zig-tag encoded varint
+            T.MAX        = 0xEF; // -120, max. zig-zag encoded varint
             
             T.NULL       = 0xF0; // null
             T.TRUE       = 0xF1; // true
@@ -216,7 +216,7 @@
                                 try {
                                     val = ByteBuffer.wrap(val);
                                     buf.writeUint8(T.BINARY);
-                                    buf.writeVarint32(val.length);
+                                    buf.writeVarint32(val.remaining());
                                     buf.append(val);
                                 } catch (e) {
                                     var keys = Object.keys(val);
