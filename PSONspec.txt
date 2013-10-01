@@ -1,5 +1,5 @@
 Working Draft                                                 D. Wirtz
-                                                             July 2013
+Version 2                                                    July 2013
                                                              
                       Protocol JSON - PSON
                  
@@ -63,23 +63,27 @@ Abstract
    
    A PSON value MUST start with a token and MAY be followed by
    
-      a varint
+      a zig-zag encoded varint
    
    or
    
-      a varint determining the length of arbitrary byte data following
+      an unsigned varint determining the length of arbitrary byte data
+      following
       
    or 
    
-      a varint determining the number of PSON values following.
+      an unsigned varint determining the number of PSON values
+      following.
       
    No other combinations are allowed.
    
-   These are the 256 tokens:
+   There are 256 tokens:
    
-      ZERO       = %x00
+      ZERO       = %x00 ;  0
+      NEGONE     = %x01 ; -1
+      ONE        = %x02 ; +1
               ...
-      MAX        = %xEF
+      MAX        = %xEF ; -120
       
       NULL       = %xF0
       TRUE       = %xF1
@@ -113,13 +117,13 @@ Abstract
 2.2.1.  Integer
 
    Integer values greater than or equal -120 and less than or equal
-   119 SHOULD be encoded as a single byte with a value between
+   119 SHOULD be encoded as a token / single byte beginning at
    
-      ZERO = %0x00
+      ZERO = %x00 ; 0
      
-   and
+   and ending at
    
-      MAX = %0xEF
+      MAX = %0xEF ; -120
      
    corresponding to the value's zig-zag encoded varint representation.
    
@@ -130,13 +134,14 @@ Abstract
       
    followed by its value as a zig-zag encoded 32 bit varint.
    
-   If an integer value exceeds 32 bits of information, it SHOULD be
-   encoded as the single byte value
+   If an integer value exceeds 32 bits of information and thus does not
+   fit into a zig-zag encoded 32 bit varint, it SHOULD be encoded as
+   the token
    
       LONG = %xF9
       
    followed by its value as a zig-zag encoded 64 bit varint or MUST be
-   reduced to 32 bits otherwise.
+   reduced to 32 bits otherwise which MAY rise a warning.
    
 2.2.2.  Floating point
 
@@ -161,64 +166,87 @@ Abstract
    
 2.2.  Arrays
 
-  An array with zero elements SHOULD be encoded as the single byte
-  value:
+  An array with zero elements SHOULD be encoded as the token
   
      EARRAY = %xF4
      
   Otherwise and arrays with one or more elements MUST be encoded as
-  the single byte value
+  the token
   
      ARRAY = %xF7
     
-  followed by the number of elements as a 32 bit varint followed by all
-  elements as a PSON encoded value.
+  followed by the number of elements as an unsigned 32 bit varint
+  followed by all elements as a PSON encoded value.
+  
+  If a value evaluates to the JavaScript constant
+   
+     undefined
+     
+  it must instead be encoded as the token:
+  
+     NULL = %xF0
    
 2.3.  Objects
 
-   An object evaluating to null MUST be encoded as the single byte
-   value:
+   An object evaluating to the JavaScript constant
+   
+      null
+      
+   MUST be encoded as the token:
    
       NULL = %xF0
       
-   An object with zero key/value pairs SHOULD be encoded as the single
-   byte value:
+   An object with zero key/value pairs SHOULD be encoded as the token:
    
       EOBJECT = %xF3
      
-   Otherwise and objects with one or more key/value pairs MUST be
-   encoded as the single byte value
+   Otherwise it and objects with one or more key/value pairs MUST be
+   encoded as the token
    
       OBJECT = %xF6
       
-   followed by the number of key/value pairs as a 32 bit varint
-   followed by the alternating keys and values as PSON encoded values.
+   followed by the number of key/value pairs as an unsigned 32 bit
+   varint followed by the alternating keys and values as PSON encoded
+   values.
+   
    Order of key/value pairs SHOULD be preserved if supported by the
    language runtime.
    
 2.4.  Strings
 
-   A string with zero characters SHOULD be encoded as the single byte
-   value:
+   A string with zero characters SHOULD be encoded as the token:
    
       ESTRING = %xF5
       
-   Otherwise and strings with one or more characters MUST be encoded
-   as the single byte value
+   Otherwise it and strings with one or more characters MUST be encoded
+   as the token
    
       STRING = %xFC
       
-   followed by the number of raw bytes as a 32 bit varint followed by
-   the raw bytes.
+   followed by the number of raw bytes as an unsigned 32 bit varint
+   followed by the UTF-8 encoded raw bytes.
    
 2.5.  Binary data
 
-   Binary data MUST be encoded as the single byte value
+   Binary data MUST be encoded as the token
   
       BINARY = %xFF
      
-   followed by the number of raw bytes as a 32 bit varint followed by
-   the raw bytes.
+   followed by the number of raw bytes as an unsigned 32 bit varint
+   followed by the raw bytes.
+   
+2.6.  undefined
+
+   In PSON there is no token for a value that equals the JavaScript
+   constant
+   
+      undefined
+      
+   and a value evaluating to undefined MUST either be skipped if it is
+   a value inside of an object or, otherwise, be encoded as if it would
+   equal the JavaScript constant:
+   
+      null
    
 3.  Dictionaries
 
@@ -233,12 +261,12 @@ Abstract
    dictionary on the encoding side, it MUST be assigned the value of
    the number of elements contained in the dictionary before the value
    has been added (index) and, instead of being encoded like in 2.4,
-   be encoded as the single byte value
+   be encoded as the token
    
       STRING_ADD = %0xFD
       
-   followed by the number of raw bytes as a 32 bit varint followed by
-   the raw bytes.
+   followed by the number of raw bytes as an unsigned 32 bit varint
+   followed by the UTF-8 encoded raw bytes.
    
    When the decoding side decodes a string that has been encoded in
    this way, it MUST add the value to its dictionary and assign it
@@ -246,16 +274,16 @@ Abstract
    before the value has been added (index).
    
    A string that has previously been added to the dictionary SHOULD,
-   instead of being encoded as in 2.4, be encoded as the single byte
-   value
+   instead of being encoded as in 2.4, be encoded as the token
    
      STRING_GET = %0xFE
      
-   followed by the previously assigned index as a 32 bit varint.
+   followed by the previously assigned index as an unsigned 32 bit
+   varint.
    
    When the decoding side decodes a string that has been encoded
    in this way, it MUST look up the index in the dictionary and
-   return the actual value instead.
+   return the remembered string value instead.
    
 3.2.  Static substitution
 
@@ -271,13 +299,13 @@ Abstract
   All floating point values MUST be encoded in little endian byte
   order.
   
-  All string values MUST be encoded in UTF-8.
+  All string values MUST be encoded as UTF-8.
   
 5.  Decoding
 
   A decoder MUST be able to process all data types defined in this
   document. It SHOULD return the corresponding values if available in
-  the language runtime.
+  the language runtime and MAY rise a warning otherwise.
   
 6.  MIME media type
 

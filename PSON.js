@@ -199,13 +199,14 @@
                             buf.writeUint8(val ? T.TRUE : T.FALSE);
                             break;
                         case 'object':
+                            var i;
                             if (Array.isArray(val)) {
                                 if (val.length == 0) {
                                     buf.writeUint8(T.EARRAY);
                                 } else {
                                     buf.writeUint8(T.ARRAY);
                                     buf.writeVarint32(val.length);
-                                    for (var i=0; i<val.length; i++) {
+                                    for (i=0; i<val.length; i++) {
                                         this._encodeValue(val[i], buf);
                                     }
                                 }
@@ -220,14 +221,19 @@
                                     buf.append(val);
                                 } catch (e) {
                                     var keys = Object.keys(val);
-                                    if (keys.length == 0) {
+                                    var n = 0;
+                                    for (i=0; i<keys.length; i++) {
+                                        if (typeof val[keys[i]] !== 'undefined') n++;
+                                    }
+                                    if (n === 0) {
                                         buf.writeUint8(T.EOBJECT);
                                     } else {
                                         buf.writeUint8(T.OBJECT);
-                                        buf.writeVarint32(keys.length);
+                                        buf.writeVarint32(n);
                                         if (!excluded) excluded = !!val._PSON_EXCL_;
-                                        for (var i=0; i<keys.length; i++) {
+                                        for (i=0; i<keys.length; i++) {
                                             var key = keys[i];
+                                            if (typeof val[key] === 'undefined') continue;
                                             if (this.dict.hasOwnProperty(key)) {
                                                 buf.writeUint8(T.STRING_GET);
                                                 buf.writeVarint32(this.dict[key]);
@@ -250,7 +256,7 @@
                             }
                             break;
                         case 'undefined':
-                            buf.writeUint8(T.UNDEFINED);
+                            buf.writeUint8(T.NULL);
                             break;
                     }
                 }
