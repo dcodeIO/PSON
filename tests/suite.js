@@ -8,55 +8,55 @@ module.exports = {
 
     "T": function(test) {
         var pson = new PSON.StaticPair();
-        test.equal(pson.encode(null).compact().toHex(), "<F0>");
-        test.equal(pson.encode(true).compact().toHex(), "<F1>");
-        test.equal(pson.encode(false).compact().toHex(), "<F2>");
-        test.equal(pson.encode({}).compact().toHex(), "<F3>");
-        test.equal(pson.encode([]).compact().toHex(), "<F4>");
-        test.equal(pson.encode("").compact().toHex(), "<F5>");
+        test.equal(pson.encode(null).compact().toString("debug"), "<F0>");
+        test.equal(pson.encode(true).compact().toString("debug"), "<F1>");
+        test.equal(pson.encode(false).compact().toString("debug"), "<F2>");
+        test.equal(pson.encode({}).compact().toString("debug"), "<F3>");
+        test.equal(pson.encode([]).compact().toString("debug"), "<F4>");
+        test.equal(pson.encode("").compact().toString("debug"), "<F5>");
         test.done();
     },
     
     "number": function(test) {
         var pson = new PSON.StaticPair(), bb;
-        test.equal(pson.encode(0).compact().toHex(), "<00>");
-        test.equal(pson.encode(-120).compact().toHex(), "<EF>");
-        test.equal((bb=pson.encode(120).compact()).toHex(), "<F8 F0 01>");
+        test.equal(pson.encode(0).compact().toString("debug"), "<00>");
+        test.equal(pson.encode(-120).compact().toString("debug"), "<EF>");
+        test.equal((bb=pson.encode(120).compact()).toString("debug"), "<F8 F0 01>");
         test.strictEqual(bb.LE().readZigZagVarint32(1).value, 120);
-        test.equal((bb=pson.encode(0.25).compact()).toHex(), "<FA 00 00 80 3E>");
+        test.equal((bb=pson.encode(0.25).compact()).toString("debug"), "<FA 00 00 80 3E>");
         test.strictEqual(bb.LE().readFloat32(1), 0.25);
-        test.equal((bb=pson.encode(0.011).compact()).toHex(), "<FB BA 49 0C 02 2B 87 86 3F>");
+        test.equal((bb=pson.encode(0.011).compact()).toString("debug"), "<FB BA 49 0C 02 2B 87 86 3F>");
         test.strictEqual(bb.LE().readFloat64(1), 0.011);
         var l = new Long.fromNumber(1);
-        test.equal((bb=pson.encode(l).compact()).toHex(), "<F9 02>");
+        test.equal((bb=pson.encode(l).compact()).toString("debug"), "<F9 02>");
         test.ok(l.equals(bb.readZigZagVarint64(1).value));
         test.done();
     },
     
     "string": function(test) {
         var pson = new PSON.StaticPair();
-        test.equal(pson.encode("abc").compact().toHex(), "<FC 03 61 62 63>");
+        test.equal(pson.encode("abc").compact().toString("debug"), "<FC 03 61 62 63>");
         test.done();
     },
     
     "object": function(test) {
         var pson = new PSON.StaticPair();
-        test.equal(pson.encode({"a":"b"}).compact().toHex(), "<F6 01 FC 01 61 FC 01 62>");
-        test.equal(pson.encode({"a":"b","c":50}).compact().toHex(), "<F6 02 FC 01 61 FC 01 62 FC 01 63 64>");
+        test.equal(pson.encode({"a":"b"}).compact().toString("debug"), "<F6 01 FC 01 61 FC 01 62>");
+        test.equal(pson.encode({"a":"b","c":50}).compact().toString("debug"), "<F6 02 FC 01 61 FC 01 62 FC 01 63 64>");
         test.done();
     },
     
     "array": function(test) {
         var pson = new PSON.StaticPair();
-        test.equal(pson.encode([1,2,3]).compact().toHex(), "<F7 03 02 04 06>");
+        test.equal(pson.encode([1,2,3]).compact().toString("debug"), "<F7 03 02 04 06>");
         test.done();
     },
     
     "undefined": function(test) {
         var pson = new PSON.StaticPair();
-        test.equal(pson.encode({"a":undefined}).compact().toHex(), "<F3>");
-        test.equal(pson.encode(undefined).compact().toHex(), "<F0>");
-        test.equal(pson.encode([0,undefined,1]).compact().toHex(), "<F7 03 00 F0 02>");
+        test.equal(pson.encode({"a":undefined}).compact().toString("debug"), "<F3>");
+        test.equal(pson.encode(undefined).compact().toString("debug"), "<F0>");
+        test.equal(pson.encode([0,undefined,1]).compact().toString("debug"), "<F7 03 00 F0 02>");
         test.done();
     },
     

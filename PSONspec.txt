@@ -209,6 +209,12 @@ Abstract
    varint followed by the alternating keys and values as PSON encoded
    values.
    
+   If a value inside of an object evaluates to the JavaScript constant
+   
+      undefined
+      
+   the corresponding key/value pair MUST be omitted.
+   
    Order of key/value pairs SHOULD be preserved if supported by the
    language runtime.
    
