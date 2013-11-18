@@ -1,6 +1,6 @@
 ![PSON](https://raw.github.com/dcodeIO/PSON/master/PSON.png)
 ====
-**PSON** is a super efficient protocol serialization format for JSON. It outperforms JSON, BSON, BJSON and, if used
+**PSON** is a super efficient binary serialization format for JSON. It outperforms JSON, BSON, BJSON and, if used
 wisely, even protobuf and thrift in encoding size!
 
 How does it work?
