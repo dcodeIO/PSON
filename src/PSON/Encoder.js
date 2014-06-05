@@ -1,20 +1,3 @@
-// #ifdef UNDEFINED
-/*
- Copyright 2013 Daniel Wirtz <dcode@dcode.io>
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
-// #endif
 /**
  * @alias PSON.Encoder
  */
@@ -70,18 +53,21 @@ PSON.Encoder = (function(ByteBuffer, T) {
     /**
      * Encodes JSON to PSON.
      * @param {*} json JSON
-     * @param {(!ByteBuffer)=} buf Buffer to encode to
+     * @param {(!ByteBuffer)=} buf Buffer to encode to. When omitted, the resulting ByteBuffer will be flipped. When
+     *  specified, it will not be flipped.
      * @returns {!ByteBuffer} PSON
      */
     Encoder.prototype.encode = function(json, buf) {
+        var doFlip = false;
         if (!buf) {
             buf = new ByteBuffer();
+            doFlip = true;
         }
         var le = buf.littleEndian;
         try {
             this._encodeValue(json, buf.LE());
             buf.littleEndian = le;
-            return buf;
+            return doFlip ? buf.flip() : buf;
         } catch (e) {
             buf.littleEndian = le;
             throw(e);
@@ -124,7 +110,7 @@ PSON.Encoder = (function(ByteBuffer, T) {
                             buf.writeUint8(zzval);
                         } else {
                             buf.writeUint8(T.INTEGER);
-                            buf.writeZigZagVarint32(val);
+                            buf.writeVarint32ZigZag(val);
                         }
                     } else {
                         fbuf.writeFloat32(val, 0);
@@ -154,7 +140,7 @@ PSON.Encoder = (function(ByteBuffer, T) {
                         }
                     } else if (Long && val instanceof Long) {
                         buf.writeUint8(T.LONG);
-                        buf.writeZigZagVarint64(val);
+                        buf.writeVarint64ZigZag(val);
                     } else {
                         try {
                             val = ByteBuffer.wrap(val);

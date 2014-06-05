@@ -1,20 +1,3 @@
-// #ifdef UNDEFINED
-/*
- Copyright 2013 Daniel Wirtz <dcode@dcode.io>
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
-// #endif
 /**
  * @alias PSON.Decoder
  */
@@ -100,10 +83,10 @@ PSON.Decoder = (function(ByteBuffer, T) {
                         arr.push(this._decodeValue(buf));
                     }
                     return arr;
-                case T.INTEGER: return buf.readZigZagVarint32();
+                case T.INTEGER: return buf.readVarint32ZigZag();
                 case T.LONG: // must not crash
-                    if (Long) return buf.readZigZagVarint64();
-                    return buf.readZigZagVarint32();
+                    if (Long) return buf.readVarint64ZigZag();
+                    return buf.readVarint32ZigZag();
                 case T.FLOAT: return buf.readFloat32();
                 case T.DOUBLE: return buf.readFloat64();
                 case T.STRING: return buf.readVString();

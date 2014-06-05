@@ -1,12 +1,11 @@
 ![PSON](https://raw.github.com/dcodeIO/PSON/master/PSON.png)
 ====
-**PSON** is a super efficient binary serialization format for JSON. It outperforms JSON, BSON, BJSON and, if used
-wisely, even protobuf and thrift in encoding size!
+**PSON** is a super efficient binary serialization format for JSON focused on minimal encoding size.
 
 How does it work?
 -----------------
-PSON combines the best of JSON, BJSON, ProtoBuf and ZIP to achieve a superior small footprint on the network level.
-Basic constants and small integer values are efficiently encoded as a single byte. Other integer values are always
+PSON combines the best of JSON, BJSON, ProtoBuf and a bit of ZIP to achieve a superior small footprint on the network
+level. Basic constants and small integer values are efficiently encoded as a single byte. Other integer values are always
 encoded as variable length integers. Additionally it comes with progressive and static dictionaries to reduce data
 redundancy to a minimum. In a nutshell:
 
@@ -87,7 +86,7 @@ require.config({
     ...
     "paths": {
         "Long": "/path/to/Long.js", // optional
-        "ByteBuffer": "/path/to/ByteBuffer.js",
+        "ByteBuffer": "/path/to/ByteBufferAB.js",
         "PSON": "/path/to/PSON.js"
     },
     ...
@@ -100,9 +99,9 @@ require(["PSON"], function(PSON) {
 #### Browser
 
 ```html
-<script src="//raw.github.com/dcodeIO/Long.js/master/Long.min.js"></script><!-- optional -->
-<script src="//raw.github.com/dcodeIO/ByteBuffer.js/master/ByteBuffer.min.js"></script>
-<script src="//raw.github.com/dcodeIO/PSON/master/PSON.min.js"></script>
+<script src="Long.min.js"></script>
+<script src="ByteBufferAB.min.js"></script>
+<script src="PSON.min.js"></script>
 ```
 
 ```js
@@ -150,6 +149,12 @@ The API is pretty much straight forward:
 #### Static
 * `new PSON.StaticPair([dictionary: Array.<string>])` constructs a new static encoder and decoder pair
   with a static (or empty) dictionary
+  
+Downloads
+---------
+* [Distributions](https://github.com/dcodeIO/PSON/tree/master/dist)
+* [ZIP-Archive](https://github.com/dcodeIO/PSON/archive/master.zip)
+* [Tarball](https://github.com/dcodeIO/PSON/tarball/master)
   
 Documentation
 -------------

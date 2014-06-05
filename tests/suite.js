@@ -1,4 +1,4 @@
-var PSON = require("../PSON.js"),
+var PSON = require("../index.js"),
     ByteBuffer = require("bytebuffer"),
     Long = ByteBuffer.Long,
     pkg = require("../package.json"),
@@ -22,14 +22,14 @@ module.exports = {
         test.equal(pson.encode(0).compact().toString("debug"), "<00>");
         test.equal(pson.encode(-120).compact().toString("debug"), "<EF>");
         test.equal((bb=pson.encode(120).compact()).toString("debug"), "<F8 F0 01>");
-        test.strictEqual(bb.LE().readZigZagVarint32(1).value, 120);
+        test.strictEqual(bb.LE().readVarint32ZigZag(1).value, 120);
         test.equal((bb=pson.encode(0.25).compact()).toString("debug"), "<FA 00 00 80 3E>");
         test.strictEqual(bb.LE().readFloat32(1), 0.25);
         test.equal((bb=pson.encode(0.011).compact()).toString("debug"), "<FB BA 49 0C 02 2B 87 86 3F>");
         test.strictEqual(bb.LE().readFloat64(1), 0.011);
         var l = new Long.fromNumber(1);
         test.equal((bb=pson.encode(l).compact()).toString("debug"), "<F9 02>");
-        test.ok(l.equals(bb.readZigZagVarint64(1).value));
+        test.ok(l.equals(bb.readVarint64ZigZag(1).value));
         test.done();
     },
     
@@ -79,7 +79,7 @@ module.exports = {
             var jsonLen;
             test.log("JSON: "+(jsonLen = JSON.stringify(data).length));
             var bb = pson.encode(data).compact();
-            test.log("PSON static: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+            test.log("PSON static: "+bb.limit+" = "+(bb.limit*100/jsonLen - 100).toFixed(3)+"%");
             var decData = pson.decode(bb);
             test.deepEqual(data, decData);
             console.log(""); bb.printDebug();
@@ -103,11 +103,11 @@ module.exports = {
             var jsonLen;
             test.log("JSON: "+(jsonLen = JSON.stringify(data).length));
             var bb = pson.encode(data).compact();
-            test.log("PSON first: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+            test.log("PSON first: "+bb.limit+" = "+(bb.limit*100/jsonLen - 100).toFixed(3)+"%");
             var decData = pson.decode(bb);
             test.deepEqual(data, decData);
             bb = pson.encode(data).compact();
-            test.log("PSON again: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+            test.log("PSON again: "+bb.limit+" = "+(bb.limit*100/jsonLen - 100).toFixed(3)+"%");
             decData = pson.decode(bb);
             console.log(""); bb.printDebug();
             test.deepEqual(data, decData);
@@ -120,10 +120,10 @@ module.exports = {
         test.log("JSON: "+(jsonLen=JSON.stringify(pkg).length));
         var pson = new PSON.StaticPair();
         var bb = pson.encode(pkg).compact();
-        test.log("PSON w/o dict: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+        test.log("PSON w/o dict: "+bb.limit+" = "+(bb.limit*100/jsonLen - 100).toFixed(3)+"%");
         pson = new PSON.StaticPair(pkgDict);
         bb = pson.encode(pkg).compact();
-        test.log("PSON w/  dict: "+bb.length+" = "+(bb.length*100/jsonLen - 100).toFixed(3)+"%");
+        test.log("PSON w/  dict: "+bb.limit+" = "+(bb.limit*100/jsonLen - 100).toFixed(3)+"%");
         console.log(""); bb.printDebug();
         test.deepEqual(pkg, pson.decode(bb));
         test.done();

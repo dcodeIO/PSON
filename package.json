@@ -1,9 +1,9 @@
 {
     "name": "pson",
     "description": "A super efficient binary serialization format for JSON.",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "author": "Daniel Wirtz <dcode@dcode.io>",
-    "main": "PSON.js",
+    "main": "index.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/dcodeIO/PSON.git"
@@ -17,18 +17,17 @@
         "node": ">=0.6"
     },
     "dependencies": {
-        "bytebuffer": "~2"
+        "bytebuffer": "~3"
     },
     "devDependencies": {
-        "preprocessor": "latest",
-        "closurecompiler": "latest",
-        "testjs": "latest"
+        "metascript": "~0",
+        "closurecompiler": "~1",
+        "testjs": "~1"
     },
     "scripts": {
         "test": "testjs",
-
-        "build": "preprocess src/PSON.js src/ > PSON.js",
-        "compile": "ccjs PSON.js > PSON.min.js",
+        "build": "metascript src/PSON.js src/ > dist/PSON.js",
+        "compile": "ccjs dist/PSON.js > dist/PSON.min.js",
         "jsdoc": "jsdoc -c jsdoc.json",
         "make": "npm run-script build && npm run-script compile && npm test && npm run-script jsdoc"
     }

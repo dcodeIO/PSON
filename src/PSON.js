@@ -34,17 +34,17 @@
          */
         var PSON = {};
 
-        // #include "PSON/T.js"
+        //? include("PSON/T.js");
         
-        // #include "PSON/Encoder.js"
+        //? include("PSON/Encoder.js");
         
-        // #include "PSON/Decoder.js"
+        //? include("PSON/Decoder.js");
         
-        // #include "PSON/Pair.js"
+        //? include("PSON/Pair.js");
         
-        // #include "PSON/StaticPair.js"
+        //? include("PSON/StaticPair.js");
         
-        // #include "PSON/ProgressivePair.js"
+        //? include("PSON/ProgressivePair.js");
 
         /**
          * Excluces an object's and its children's keys from being added to a progressive dictionary.
