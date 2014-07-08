@@ -180,7 +180,7 @@
                                     buf.writeVarint32(this.dict[val]);
                                 } else {
                                     buf.writeUint8(T.STRING);
-                                    buf.writeVString(this.options.lzstring ? LZString.compressToUTF16(val) : val);
+                                    buf.writeVString(val);
                                 }
                             }
                             break;
