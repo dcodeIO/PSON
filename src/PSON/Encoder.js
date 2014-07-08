@@ -22,9 +22,10 @@ PSON.Encoder = (function(ByteBuffer, T) {
      * @class A PSON Encoder.
      * @param {Array.<string>=} dict Initial dictionary
      * @param {boolean} progressive Whether this is a progressive or a static encoder
+     * @param {Object.<string,*>=} options Options
      * @constructor
      */
-    var Encoder = function(dict, progressive) {
+    var Encoder = function(dict, progressive, options) {
 
         /**
          * Dictionary hash.
@@ -48,6 +49,12 @@ PSON.Encoder = (function(ByteBuffer, T) {
          * @type {boolean}
          */
         this.progressive = !!progressive;
+
+        /**
+         * Options.
+         * @type {Object.<string,*>}
+         */
+        this.options = options || {};
     };
 
     /**
@@ -90,7 +97,7 @@ PSON.Encoder = (function(ByteBuffer, T) {
                     val = val.toString();
                     // fall through
                 case 'string':
-                    if (val.length == 0) {
+                    if (val.length === 0) {
                         buf.writeUint8(T.ESTRING);
                     } else {
                         if (this.dict.hasOwnProperty(val)) {
@@ -98,7 +105,7 @@ PSON.Encoder = (function(ByteBuffer, T) {
                             buf.writeVarint32(this.dict[val]);
                         } else {
                             buf.writeUint8(T.STRING);
-                            buf.writeVString(val);
+                            buf.writeVString(this.options.lzstring ? LZString.compressToUTF16(val) : val);
                         }
                     }
                     break;
@@ -129,7 +136,7 @@ PSON.Encoder = (function(ByteBuffer, T) {
                 case 'object':
                     var i;
                     if (Array.isArray(val)) {
-                        if (val.length == 0) {
+                        if (val.length === 0) {
                             buf.writeUint8(T.EARRAY);
                         } else {
                             buf.writeUint8(T.ARRAY);
@@ -170,12 +177,11 @@ PSON.Encoder = (function(ByteBuffer, T) {
                                             // Add to dictionary
                                             this.dict[key] = this.next++;
                                             buf.writeUint8(T.STRING_ADD);
-                                            buf.writeVString(key);
                                         } else {
                                             // Plain string
                                             buf.writeUint8(T.STRING);
-                                            buf.writeVString(key);
                                         }
+                                        buf.writeVString(key);
                                     }
                                     this._encodeValue(val[key], buf);
                                 }

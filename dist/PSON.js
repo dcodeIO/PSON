@@ -65,9 +65,9 @@
             T.FLOAT      = 0xFA; // number (float32)
             T.DOUBLE     = 0xFB; // number (float64)
             T.STRING     = 0xFC; // string (varint length + data)
-            T.STRING_ADD = 0xFD; // string (varint length + data + add to dictionary)
+            T.STRING_ADD = 0xFD; // string (varint length + data, add to dictionary)
             T.STRING_GET = 0xFE; // string (varint index to get from dictionary)
-            T.BINARY     = 0xFF; // ArrayBuffer (varint length + bytes)
+            T.BINARY     = 0xFF; // bytes (varint length + data)
 
             return T;
 
@@ -97,9 +97,10 @@
              * @class A PSON Encoder.
              * @param {Array.<string>=} dict Initial dictionary
              * @param {boolean} progressive Whether this is a progressive or a static encoder
+             * @param {Object.<string,*>=} options Options
              * @constructor
              */
-            var Encoder = function(dict, progressive) {
+            var Encoder = function(dict, progressive, options) {
 
                 /**
                  * Dictionary hash.
@@ -123,6 +124,12 @@
                  * @type {boolean}
                  */
                 this.progressive = !!progressive;
+
+                /**
+                 * Options.
+                 * @type {Object.<string,*>}
+                 */
+                this.options = options || {};
             };
 
             /**
@@ -165,7 +172,7 @@
                             val = val.toString();
                             // fall through
                         case 'string':
-                            if (val.length == 0) {
+                            if (val.length === 0) {
                                 buf.writeUint8(T.ESTRING);
                             } else {
                                 if (this.dict.hasOwnProperty(val)) {
@@ -173,7 +180,7 @@
                                     buf.writeVarint32(this.dict[val]);
                                 } else {
                                     buf.writeUint8(T.STRING);
-                                    buf.writeVString(val);
+                                    buf.writeVString(this.options.lzstring ? LZString.compressToUTF16(val) : val);
                                 }
                             }
                             break;
@@ -204,7 +211,7 @@
                         case 'object':
                             var i;
                             if (Array.isArray(val)) {
-                                if (val.length == 0) {
+                                if (val.length === 0) {
                                     buf.writeUint8(T.EARRAY);
                                 } else {
                                     buf.writeUint8(T.ARRAY);
@@ -245,12 +252,11 @@
                                                     // Add to dictionary
                                                     this.dict[key] = this.next++;
                                                     buf.writeUint8(T.STRING_ADD);
-                                                    buf.writeVString(key);
                                                 } else {
                                                     // Plain string
                                                     buf.writeUint8(T.STRING);
-                                                    buf.writeVString(key);
                                                 }
+                                                buf.writeVString(key);
                                             }
                                             this._encodeValue(val[key], buf);
                                         }
@@ -285,9 +291,11 @@
              * @exports PSON.Decoder
              * @class A PSON Decoder.
              * @param {Array.<string>} dict Initial dictionary values
+             * @param {boolean} progressive Whether this is a progressive or a static decoder
+             * @param {Object.<string,*>=} options Options
              * @constructor
              */
-            var Decoder = function(dict, progressive) {
+            var Decoder = function(dict, progressive, options) {
 
                 /**
                  * Dictionary array.
@@ -300,6 +308,12 @@
                  * @type {boolean}
                  */
                 this.progressive = !!progressive;
+
+                /**
+                 * Options.
+                 * @type {Object.<string,*>}
+                 */
+                this.options = options || {};
             };
 
             /**
@@ -397,14 +411,14 @@
             var Pair = function() {
 
                 /**
-                 * PSON Encoder.
+                 * Encoder.
                  * @type {!PSON.Encoder}
                  * @expose
                  */
                 this.encoder;
 
                 /**
-                 * PSON Decoder.
+                 * Decoder.
                  * @type {!PSON.Decoder}
                  * @expose
                  */
@@ -464,17 +478,15 @@
              * @exports PSON.StaticPair
              * @class A static PSON encoder and decoder pair.
              * @param {Array.<string>=} dict Static dictionary
+             * @param {Object.<string,*>=} options Options
              * @constructor
              * @extends PSON.Pair
              */
-            var StaticPair = function(dict) {
+            var StaticPair = function(dict, options) {
                 Pair.call(this);
 
-                // Static encoder
-                this.encoder = new Encoder(dict, false);
-
-                // Static decoder
-                this.decoder = new Decoder(dict, false);
+                this.encoder = new Encoder(dict, false, options);
+                this.decoder = new Decoder(dict, false, options);
             };
 
             // Extends PSON.Pair
@@ -494,22 +506,19 @@
              * @exports PSON.ProgressivePair
              * @class A progressive PSON encoder and decoder pair.
              * @param {Array.<string>=} dict Initial dictionary
+             * @param {Object.<string,*>=} options Options
              * @constructor
              * @extends PSON.Pair
              */
-            var ProgressivePair = function(dict) {
+            var ProgressivePair = function(dict, options) {
                 Pair.call(this);
 
-                // Progressive encoder
-                this.encoder = new Encoder(dict, true);
-
-                // Progressive decoder
-                this.decoder = new Decoder(dict, true);
+                this.encoder = new Encoder(dict, true, options);
+                this.decoder = new Decoder(dict, true, options);
             };
 
             // Extends PSON.Pair
             ProgressivePair.prototype = Object.create(Pair.prototype);
-
 
             /**
              * Alias for {@link PSON.exclude}.

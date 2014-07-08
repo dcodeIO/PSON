@@ -8,22 +8,19 @@ PSON.ProgressivePair = (function(Pair, Encoder, Decoder) {
      * @exports PSON.ProgressivePair
      * @class A progressive PSON encoder and decoder pair.
      * @param {Array.<string>=} dict Initial dictionary
+     * @param {Object.<string,*>=} options Options
      * @constructor
      * @extends PSON.Pair
      */
-    var ProgressivePair = function(dict) {
+    var ProgressivePair = function(dict, options) {
         Pair.call(this);
-        
-        // Progressive encoder
-        this.encoder = new Encoder(dict, true);
-        
-        // Progressive decoder
-        this.decoder = new Decoder(dict, true);
+
+        this.encoder = new Encoder(dict, true, options);
+        this.decoder = new Decoder(dict, true, options);
     };
     
     // Extends PSON.Pair
     ProgressivePair.prototype = Object.create(Pair.prototype);
-
 
     /**
      * Alias for {@link PSON.exclude}.

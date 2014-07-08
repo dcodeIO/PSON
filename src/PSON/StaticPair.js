@@ -8,17 +8,15 @@ PSON.StaticPair = (function(Pair, Encoder, Decoder) {
      * @exports PSON.StaticPair
      * @class A static PSON encoder and decoder pair.
      * @param {Array.<string>=} dict Static dictionary
+     * @param {Object.<string,*>=} options Options
      * @constructor
      * @extends PSON.Pair
      */
-    var StaticPair = function(dict) {
+    var StaticPair = function(dict, options) {
         Pair.call(this);
         
-        // Static encoder
-        this.encoder = new Encoder(dict, false);
-        
-        // Static decoder
-        this.decoder = new Decoder(dict, false);
+        this.encoder = new Encoder(dict, false, options);
+        this.decoder = new Decoder(dict, false, options);
     };
     
     // Extends PSON.Pair

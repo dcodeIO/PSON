@@ -13,14 +13,14 @@ PSON.Pair = (function() {
     var Pair = function() {
 
         /**
-         * PSON Encoder.
+         * Encoder.
          * @type {!PSON.Encoder}
          * @expose
          */
         this.encoder;
 
         /**
-         * PSON Decoder.
+         * Decoder.
          * @type {!PSON.Decoder}
          * @expose
          */

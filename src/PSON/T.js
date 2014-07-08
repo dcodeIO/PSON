@@ -29,9 +29,9 @@ PSON.T = (function() {
     T.FLOAT      = 0xFA; // number (float32)
     T.DOUBLE     = 0xFB; // number (float64)
     T.STRING     = 0xFC; // string (varint length + data)
-    T.STRING_ADD = 0xFD; // string (varint length + data + add to dictionary)
+    T.STRING_ADD = 0xFD; // string (varint length + data, add to dictionary)
     T.STRING_GET = 0xFE; // string (varint index to get from dictionary)
-    T.BINARY     = 0xFF; // ArrayBuffer (varint length + bytes)
+    T.BINARY     = 0xFF; // bytes (varint length + data)
     
     return T;
     

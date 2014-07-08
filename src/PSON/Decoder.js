@@ -14,9 +14,11 @@ PSON.Decoder = (function(ByteBuffer, T) {
      * @exports PSON.Decoder
      * @class A PSON Decoder.
      * @param {Array.<string>} dict Initial dictionary values
+     * @param {boolean} progressive Whether this is a progressive or a static decoder
+     * @param {Object.<string,*>=} options Options
      * @constructor
      */
-    var Decoder = function(dict, progressive) {
+    var Decoder = function(dict, progressive, options) {
 
         /**
          * Dictionary array.
@@ -29,6 +31,12 @@ PSON.Decoder = (function(ByteBuffer, T) {
          * @type {boolean}
          */
         this.progressive = !!progressive;
+
+        /**
+         * Options.
+         * @type {Object.<string,*>}
+         */
+        this.options = options || {};
     };
 
     /**
